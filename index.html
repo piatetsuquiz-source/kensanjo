@@ -21104,6 +21104,7 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
 
 
 
+
 <script>/* TOEIC LISTEN */
 /* TOEIC LISTEN */
 (function(){
@@ -21116,14 +21117,15 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
       ['p2','Part2 応答問題','1つの質問と3つの応答が流れます。最も適切な応答を選んでください。<b>本番では選択肢は印刷されません</b>（解答後に英文が表示されます）。'],
       ['p3','Part3 会話問題','2人の会話を聞いて設問に答えます。設問と選択肢は印刷されています（本番同様）。'],
       ['p4','Part4 説明文','1人のアナウンス・店内放送・留守電などを聞いて設問に答えます。'],
-      ['drill','聞き取りドリル','数字・時刻・つづり・金額など、聞き分けが難しい要素だけを1文ずつ集中練習します。']
+      ['drill','聞き取りドリル','数字・時刻・つづり・金額など、聞き分けが難しい要素だけを1文ずつ集中練習します。'],
+      ['mix','ミックス（全範囲）','Part1〜4と聞き取りドリルをまとめてランダムに出題します。分野の切り替えなしで通し練習したいときに使います。']
     ];
     var LOG={};
     function loadLog(){ try{ LOG=JSON.parse(localStorage.getItem(LK)||'{}')||{}; }catch(e){ LOG={}; } }
     function saveLog(){ try{ localStorage.setItem(LK,JSON.stringify(LOG)); }catch(e){} }
     loadLog();
 
-    var st={mode:'p1',idx:{p1:0,p2:0,p3:0,p4:0,drill:0},rate:1,pick:{},played:0,token:0,speedOpen:false,audio:null};
+    var st={mode:'p1',idx:{p1:0,p2:0,p3:0,p4:0,drill:0,mix:0},rate:1,pick:{},played:0,token:0,speedOpen:false,audio:null,rnd:false,order:{}};
 
     var CSS=[
       '.lst{color:var(--ink);font-size:13px;line-height:1.75}',
@@ -21172,7 +21174,13 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
       '.lst-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(30px,1fr));gap:4px;margin:10px 0 0}',
       '.lst-cell{height:22px;border-radius:4px;background:#E7EDF3;border:1px solid var(--line);font-size:0;cursor:pointer}',
       '.lst-cell.ok{background:#BFDCCB;border-color:#8CBCA3}',
-      '.lst-cell.ng{background:#EEC3BD;border-color:#D19A92}'
+      '.lst-cell.ng{background:#EEC3BD;border-color:#D19A92}',
+      '.lst-cell.cur{outline:2px solid #1E4A75;outline-offset:1px}',
+      '.lst-tog{border:1px solid var(--line);background:#fff;color:#3A4A5C;font-size:11.5px;padding:5px 12px;border-radius:15px;cursor:pointer;font-family:inherit}',
+      '.lst-tog.on{background:var(--ai);border-color:var(--ai);color:#fff;font-weight:600}',
+      '.lst-mid{background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-size:12.5px;cursor:pointer;font-family:inherit;color:#1E4A75}',
+      '.lst-mid:hover{border-color:#8FB0CC}',
+      '.lst-mixn{font-family:"IBM Plex Mono",monospace;font-size:10.5px;padding:1px 6px;border-radius:5px;background:#EDF3F8;border:1px solid #C6D8E6;color:#1E4A75;margin-left:7px}'
     ].join('');
 
     if(!document.getElementById('lst-style')){
@@ -21180,8 +21188,13 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
       (document.head||document.documentElement).appendChild(stl);
     }
 
-    function list(m){ return DATA[m]||[]; }
-    function curIt(){ var a=list(st.mode); return a[st.idx[st.mode]]||null; }
+    function list(m){ if(m==='mix'){ if(!MIXCACHE){ MIXCACHE=[]; var ks=['p1','p2','p3','p4','drill']; for(var _k=0;_k<ks.length;_k++){ var _a=DATA[ks[_k]]||[]; for(var _i=0;_i<_a.length;_i++) MIXCACHE.push(_a[_i]); } } return MIXCACHE; } return DATA[m]||[]; }
+    var MIXCACHE=null;
+    function shuffleIdx(n){ var a=[],i,j,t; for(i=0;i<n;i++)a.push(i); for(i=n-1;i>0;i--){ j=Math.floor(Math.random()*(i+1)); t=a[i];a[i]=a[j];a[j]=t; } return a; }
+    function orderFor(m){ if(!st.rnd) return null; var a=list(m); if(!st.order[m]||st.order[m].length!==a.length) st.order[m]=shuffleIdx(a.length); return st.order[m]; }
+    function posOf(m,k){ var o=orderFor(m); if(!o) return k; for(var i=0;i<o.length;i++){ if(o[i]===k) return i; } return k; }
+    function absIdx(m){ var o=orderFor(m),i=st.idx[m]||0; return o?(o[i]===undefined?0:o[i]):i; }
+    function curIt(){ var a=list(st.mode); return a[absIdx(st.mode)]||null; }
     function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
     function pl(i){ return String.fromCharCode(65+i); }
     function resKey(id){ return id; }
@@ -21312,7 +21325,9 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
       if(!it){ return h+'</div>'; }
 
       h+='<div class="lst-bill">';
-      h+='<div class="lst-sh"><span class="lst-id">'+st.mode.toUpperCase()+' '+esc(it.id)+(it.part?' ／ Part '+esc(it.part):'')+'</span>'+
+      var _tot=list(st.mode).length,_pos=(st.idx[st.mode]||0)+1;
+      h+='<div class="lst-sh"><span class="lst-id">'+st.mode.toUpperCase()+' '+esc(it.id)+(it.part?' ／ Part '+esc(it.part):'')+
+         (st.rnd?'<span class="lst-mixn">ランダム '+_pos+' / '+_tot+'</span>':'<span class="lst-mixn">'+_pos+' / '+_tot+'</span>')+'</span>'+
          '<span class="lst-prog">この分野の記録：挑戦 <b>'+pr.n+'</b> / '+pr.t+'　正解 '+pr.c+'</span></div>';
 
       if(it.img) h+='<div class="lst-photo"><img src="'+it.img+'" alt="Part1の写真"></div>';
@@ -21324,11 +21339,14 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
            [0.5,0.75,1,1.25,1.5,2].map(function(r){return '<button data-rate="'+r+'" class="'+(Math.abs(st.rate-r)<0.001?'on':'')+'">'+r+'×</button>';}).join('')+
          '</span>'+
          '<span class="lst-cnt">再生 '+st.played+' 回</span>'+
+         '<button class="lst-tog'+(st.rnd?' on':'')+'" id="lst-rnd">出題順：'+(st.rnd?'ランダム':'番号順')+'</button>'+
+         (st.rnd?'<button class="lst-nv" id="lst-resh" style="padding:5px 10px;font-size:11.5px">引き直す</button>':'')+
          '</div>';
       h+=bodyHTML(it);
 
       h+='<div class="lst-nav" style="margin-top:12px">'+
          '<button class="lst-nv" id="lst-prev"'+(st.idx[st.mode]<=0?' disabled':'')+'>◀ 前へ</button>'+
+         '<button class="lst-mid" id="lst-omakase">未挑戦をランダムに1問</button>'+
          '<button class="lst-nv" id="lst-next"'+(st.idx[st.mode]>=list(st.mode).length-1?' disabled':'')+'>次へ ▶</button>'+
          '</div>';
 
@@ -21336,16 +21354,17 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
 
       // index grid
       var a=list(st.mode);
-      h+='<div class="lst-bill"><h3 style="font-size:13.5px">'+MODES.filter(function(x){return x[0]===st.mode;})[0][1]+'　全'+a.length+'問</h3>';
-      h+='<p class="lst-cap">マスをクリックするとその問題に移動します。緑＝正解、赤＝不正解、灰＝未挑戦。</p><div class="lst-grid">';
+      h+='<div class="lst-bill"><h3 style="font-size:13.5px">'+MODES.filter(function(x){return x[0]===st.mode;})[0][1]+'　全'+a.length+'問'+(st.rnd?'（ランダム順）':'')+'</h3>';
+      h+='<p class="lst-cap">マスをクリックするとその問題に移動します。緑＝正解、赤＝不正解、灰＝未挑戦、青枠＝いま表示中。</p><div class="lst-grid">';
       for(var k=0;k<a.length;k++){
         var r=LOG[a[k].id];
         var cc='lst-cell'+((r===1)?' ok':((r===0)?' ng':''));
+        if(k===absIdx(st.mode)) cc+=' cur';
         h+='<button class="'+cc+'" data-jump="'+k+'" title="'+(k+1)+'">'+(k+1)+'</button>';
       }
       h+='</div></div>';
 
-      h+='<div class="lst-hint">再生速度は <b>0.5倍〜2.0倍</b> のスライダー、または 0.5／0.75／1.0／1.25／1.5／2.0 のボタンで変更できます（速度を変えても声の高さは変わりません）。Part1・Part2の音声は選択肢番号（A・B・C…）を読み上げます。'+
+      h+='<div class="lst-hint"><b>ランダム出題</b>：再生バーの「出題順」ボタンで番号順⇔ランダムを切り替えます（「引き直す」で並び直し、「未挑戦をランダムに1問」でまだ解いていない問題へ移動）。<br>再生速度は <b>0.5倍〜2.0倍</b> のスライダー、または 0.5／0.75／1.0／1.25／1.5／2.0 のボタンで変更できます（速度を変えても声の高さは変わりません）。Part1・Part2の音声は選択肢番号（A・B・C…）を読み上げます。'+
          '配布用の単体ファイル（ZIP）で使う場合は、同じフォルダに <b>audio</b> フォルダが必要です。</div>';
       h+='</div>';
       return h;
@@ -21370,13 +21389,33 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
         if(!t||t===root) return;
 
         var mb=t.getAttribute&&t.getAttribute('data-mode');
-        if(mb){ stopAudio(); st.mode=mb; st.played=0; draw(); return; }
+        if(mb){ stopAudio(); st.mode=mb; if(mb==='mix'){ st.rnd=true; } st.played=0; draw(); return; }
 
         var rt=t.getAttribute&&t.getAttribute('data-rate');
         if(rt){ st.rate=parseFloat(rt); if(st.audio){try{st.audio.playbackRate=st.rate;}catch(e){}} draw(); return; }
 
         var jp=t.getAttribute&&t.getAttribute('data-jump');
-        if(jp!==null&&jp!==undefined&&jp!==''){ stopAudio(); st.idx[st.mode]=parseInt(jp,10); st.played=0; draw(); return; }
+        if(jp!==null&&jp!==undefined&&jp!==''){ stopAudio(); st.idx[st.mode]=posOf(st.mode,parseInt(jp,10)); st.played=0; draw(); return; }
+
+        if(t.id==='lst-rnd'){
+          stopAudio();
+          var curA=absIdx(st.mode);
+          st.rnd=!st.rnd;
+          if(st.rnd){ st.order[st.mode]=shuffleIdx(list(st.mode).length); st.idx[st.mode]=posOf(st.mode,curA); }
+          else { st.idx[st.mode]=curA; }
+          st.played=0; draw(); return;
+        }
+        if(t.id==='lst-resh'){
+          stopAudio(); st.order[st.mode]=shuffleIdx(list(st.mode).length); st.idx[st.mode]=0; st.played=0; draw(); return;
+        }
+        if(t.id==='lst-omakase'){
+          stopAudio();
+          var arr=list(st.mode),pool=[],oi;
+          for(oi=0;oi<arr.length;oi++){ if(typeof LOG[arr[oi].id]!=='number') pool.push(oi); }
+          if(!pool.length){ for(oi=0;oi<arr.length;oi++) pool.push(oi); }
+          var pk=pool[Math.floor(Math.random()*pool.length)];
+          st.idx[st.mode]=posOf(st.mode,pk); st.played=0; draw(); return;
+        }
 
         if(t.id==='lst-play'){ var it=curIt(); if(it) playSeq(it.files,gapsFor(it),null); drawCount(); return; }
         if(t.id==='lst-stop'){ stopAudio(); return; }
