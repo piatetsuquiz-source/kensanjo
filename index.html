@@ -3551,7 +3551,7 @@ function renderTabs(){
     ['drill','演習', cur.qs.length],
     ['tagd','分野別']
   ];
-  if (cur.id === 'gyosei') items.push(['write','記述式'], ['mselect','多肢選択式']); else if (cur.id === 'qc1') items.push(['write','論述'], ['mselect','多肢選択式']); if (cur.id !== 'gyosei' && cur.id !== 'sharo' && cur.id !== 'qc1' && cur.id !== 'torohan') items.push(['mselect','多肢選択式']);
+  if (cur.id === 'gyosei') items.push(['write','記述式']); else if (cur.id === 'qc1') items.push(['write','論述']); if (cur.id==='gyosei'||cur.id==='sharo'||(typeof MSELECT_BANKS!=='undefined'&&MSELECT_BANKS&&MSELECT_BANKS[cur.id])) items.push(['mselect','多肢選択式']);
   if (['boki3','boki2','fp3','fp2','takken','denki2','kika','kisho','shobo6','sharo','qc3','qc2','qc1'].indexOf(cur.id)>=0) items.push(['cbt','CBT演習']);
   else if (cur.id === 'sharo') items.push(['write','選択式']);
   if (['kisho','boki3','boki2','denki2'].indexOf(cur.id) >= 0) items.push(['jitsugi','実技']);
@@ -4032,7 +4032,7 @@ spineEl.addEventListener('click', ev => {
   if (mock.phase === 'run'){ clearInterval(mock.tick); mock.tick = null; }
   mock = {phase:'setup', subject:'all', id:e.id, order:[], i:0, picks:[], left:0, total:0, tick:null, elapsed:0, score:0};
   cur = e; quiz = {order:[], i:0, picked:null, filter:'all'}; if (tab === 'write' && e.id === 'takken') tab = 'overview'; if (tab === 'write' && e.id !== 'gyosei' && e.id !== 'sharo' && e.id !== 'qc1') tab = 'overview';
-  if (tab === 'cbt' && ['boki3','boki2','fp3','fp2','takken','denki2','kika','kisho','shobo6','sharo','qc3','qc2','qc1'].indexOf(e.id) < 0) tab = 'overview'; if (tab === 'jitsugi' && ['kisho','boki3','boki2','denki2'].indexOf(e.id) < 0) tab = 'overview';
+  if (tab === 'cbt' && ['boki3','boki2','fp3','fp2','takken','denki2','kika','kisho','shobo6','sharo','qc3','qc2','qc1'].indexOf(e.id) < 0) tab = 'overview'; if (tab === 'mselect' && !(e.id==='gyosei'||e.id==='sharo'||(typeof MSELECT_BANKS!=='undefined'&&MSELECT_BANKS&&MSELECT_BANKS[e.id]))) tab = 'overview'; if (tab === 'jitsugi' && ['kisho','boki3','boki2','denki2'].indexOf(e.id) < 0) tab = 'overview';
   renderAll(); window.scrollTo({top:0, behavior:'smooth'});
 });
 
@@ -14381,9 +14381,9 @@ var TERMSX={};[TXX0,TXX1,TXX2,TXX3,TXX4].forEach(function(o){Object.keys(o).forE
 var MSELECT_BANKS={};Object.keys(MSELX0).forEach(function(id){if(id==="gyosei_extra")return;MSELECT_BANKS[id]={title:"多肢選択式（穴埋め語群）",note:"全"+MSELX0[id].length+"問 ／ 練習用",lead:"本試験の形式にかかわらず、条文や用語の要件・効果を語群から選んで固める練習モードです。空欄をタップしてから語群の語をタップすると入り、同じ語は1回だけ使えます。",caution:"実際の本試験で多肢選択式が出題されない資格もあります。この演習は重要事項を穴埋めで確認するための独自の練習形式です。",perBlank:2,items:MSELX0[id]};});
 if(MSELX0.gyosei_extra&&typeof MSELECT!=="undefined"){var _h=new Set(MSELECT.items.map(function(x){return x.id;}));MSELX0.gyosei_extra.forEach(function(it){if(!_h.has(it.id))MSELECT.items.push(it);});MSELECT.note="全"+MSELECT.items.length+"問 ／ 練習用";}
 Object.keys(TERMSX).forEach(function(id){var e=EXAMS.filter(function(x){return x.id===id;})[0];if(!e)return;e.terms=e.terms||[];var seen=new Set(e.terms.map(function(t){return t.t;}));TERMSX[id].forEach(function(t){if(seen.has(t.t))return;seen.add(t.t);e.terms.push(t);});console.log("T14 "+id+" terms="+e.terms.length);});
-function __mselSet(){if(cur.id==="gyosei")return MSELECT;if(cur.id==="sharo")return SELECTQ;return MSELECT_BANKS[cur.id]||MSELECT;}
+function __mselSet(){if(cur.id==="gyosei")return (typeof MSELECT!=="undefined"?MSELECT:null);if(cur.id==="sharo")return (typeof SELECTQ!=="undefined"?SELECTQ:null);return (MSELECT_BANKS&&MSELECT_BANKS[cur.id])||null;}
 curSel=function(){return __mselSet();};
-panelMselect=function(){writeInit();return panelSelectQ(__mselSet());};
+panelMselect=function(){writeInit();var __b=__mselSet();if(!__b||!__b.items||!__b.items.length)return panelOverview();return panelSelectQ(__b);};
 window.MSELECT_BANKS=MSELECT_BANKS;
 try{renderAll();}catch(e){console.warn("cbt14 render: "+e.message);}
 
@@ -20234,6 +20234,319 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
   }catch(e){ if(window.console) console.error('TOEIC PRACTICE',e); }
 })();
 /* TOEIC PRACTICE END */
+
+</script>
+<script>
+/* TOEIC PRACTICE2 */
+(function(){
+  try{
+    var TQ2=[
+/* ===== Part5 文法（41〜80） ===== */
+{tag:'Part5 文法',sub:'時制',lv:2,q:'The board of directors ( ) the merger by the time the market closed.',c:['approved','had approved','has approved','approving'],a:1,exp:'市場が閉まる前に承認が完了していたので過去完了had approved。'},
+{tag:'Part5 文法',sub:'時制',lv:2,q:'Our department ( ) a new inventory system when the audit began.',c:['was installing','installs','has installed','install'],a:0,exp:'過去のある時点で進行中だった行為は過去進行形。'},
+{tag:'Part5 文法',sub:'時制',lv:1,q:'The train to the airport ( ) every 15 minutes.',c:['departs','departing','departed','has departed'],a:0,exp:'習慣的な事実は現在形で表す。'},
+{tag:'Part5 文法',sub:'時制',lv:2,q:'The contract ( ) by both parties before the project starts.',c:['will sign','will be signed','signs','signing'],a:1,exp:'契約は署名される側なので未来の受動態will be signed。'},
+{tag:'Part5 文法',sub:'助動詞',lv:2,q:'You ( ) submit the application in person; online submission is also accepted.',c:['must not','need not','should not','cannot'],a:1,exp:'「する必要はない」はneed not。'},
+{tag:'Part5 文法',sub:'助動詞',lv:3,q:'The package ( ) have been delivered yesterday, but no one signed for it.',c:['should','can','would','must not'],a:0,exp:'「〜だったはずだ」はshould have＋過去分詞。'},
+{tag:'Part5 文法',sub:'分詞',lv:2,q:'( ) about the delay, the client requested a full refund.',c:['Concerning','Concerned','Concern','To concern'],a:1,exp:'人の感情を表す分詞は過去分詞。Concerned about〜で「〜を心配して」。'},
+{tag:'Part5 文法',sub:'分詞',lv:2,q:'The ( ) figures show a steady rise in online sales.',c:['attaching','attached','attach','attachment'],a:1,exp:'「添付された」の意味で過去分詞attachedが名詞を修飾する。'},
+{tag:'Part5 文法',sub:'分詞構文',lv:3,q:'( ) the survey results, we decided to revise the product design.',c:['Reviewing','Reviewed','To review','Review'],a:0,exp:'主語weとreviewは能動の関係なので現在分詞の分詞構文。'},
+{tag:'Part5 文法',sub:'不定詞・動名詞',lv:2,q:'The manager decided ( ) the meeting until next Monday.',c:['postponing','to postpone','postpone','postponed'],a:1,exp:'decideはto不定詞をとる動詞。'},
+{tag:'Part5 文法',sub:'不定詞・動名詞',lv:2,q:'We recommend ( ) your reservation at least two weeks in advance.',c:['to make','make','making','made'],a:2,exp:'recommendは動名詞をとる。'},
+{tag:'Part5 文法',sub:'不定詞・動名詞',lv:2,q:'The new software allows users ( ) files from any device.',c:['accessing','to access','access','accessed'],a:1,exp:'allow A to do〜の形。'},
+{tag:'Part5 文法',sub:'不定詞・動名詞',lv:2,q:'The seminar is designed ( ) new hires improve their communication skills.',c:['help','helping','to help','helped'],a:2,exp:'be designed to do〜で「〜するように作られている」。'},
+{tag:'Part5 文法',sub:'受動態',lv:2,q:'The defective items ( ) to the supplier last week.',c:['returned','were returned','have returned','returning'],a:1,exp:'商品は返送される側なので過去の受動態。'},
+{tag:'Part5 文法',sub:'受動態',lv:3,q:'The proposal is expected ( ) by the committee tomorrow.',c:['approving','to approve','to be approved','approved'],a:2,exp:'be expected to be＋過去分詞で「〜されると予想される」。'},
+{tag:'Part5 文法',sub:'比較',lv:2,q:'The new printer is ( ) as the old one in terms of speed.',c:['as fast','faster','fastest','so fast'],a:0,exp:'as＋原級＋asの同級比較。'},
+{tag:'Part5 文法',sub:'比較',lv:3,q:'The sooner we finalize the design, ( ) we can begin production.',c:['the earlier','the earliest','earlier','earliest'],a:0,exp:'the＋比較級, the＋比較級の構文。'},
+{tag:'Part5 文法',sub:'比較',lv:2,q:'This is ( ) the most cost-effective option available.',c:['much','very','so','too'],a:0,exp:'最上級を強めるのはmuch。'},
+{tag:'Part5 文法',sub:'関係詞',lv:2,q:'The city ( ) the factory is located has strict environmental rules.',c:['which','where','that','when'],a:1,exp:'場所を表す先行詞には関係副詞where。'},
+{tag:'Part5 文法',sub:'関係詞',lv:3,q:'( ) the reason for the delay, we cannot ship the order today.',c:['Whoever','Whatever','Whichever','Whenever'],a:1,exp:'「理由が何であれ」はWhatever the reason。'},
+{tag:'Part5 文法',sub:'仮定法',lv:3,q:'( ) the weather have been better, we would have held the event outdoors.',c:['Should','Had','Were','If'],a:1,exp:'仮定法過去完了のifを省略した倒置でHad＋過去分詞。'},
+{tag:'Part5 文法',sub:'仮定法',lv:3,q:'I wish I ( ) more time to prepare the presentation.',c:['have','had','will have','having'],a:1,exp:'現在の事実に反する願望はI wish＋仮定法過去。'},
+{tag:'Part5 文法',sub:'名詞・冠詞',lv:2,q:'The company has made ( ) progress in reducing waste.',c:['a','an','the','some'],a:3,exp:'progressは不可算名詞で、不定冠詞は付かない。some progressが適する。'},
+{tag:'Part5 文法',sub:'名詞・冠詞',lv:2,q:'Please submit two ( ) of your identification.',c:['copy','copies','copying','copied'],a:1,exp:'twoの後は複数形copies。'},
+{tag:'Part5 文法',sub:'副詞',lv:2,q:'The shipment arrived ( ) than the customer expected.',c:['early','earlier','earliest','earliness'],a:1,exp:'thanを伴う比較級の副詞earlier。'},
+{tag:'Part5 文法',sub:'副詞',lv:3,q:'The team worked ( ) to meet the tight deadline.',c:['diligent','diligence','diligently','more diligent'],a:2,exp:'動詞workedを修飾する副詞diligently。'},
+{tag:'Part5 文法',sub:'代名詞',lv:2,q:'The revised manual is easier to follow than ( ).',c:['it','its','itself','the old one'],a:3,exp:'比較対象を明確にする名詞句が必要。'},
+{tag:'Part5 文法',sub:'語法',lv:2,q:'All staff are required to attend the meeting ( ) exception.',c:['with','without','beside','except'],a:1,exp:'without exceptionで「例外なく」。'},
+{tag:'Part5 文法',sub:'語法',lv:2,q:'The new café is located ( ) the train station.',c:['next','near to','near','nearly'],a:2,exp:'near＋名詞で「〜の近くに」。nearlyは「ほとんど」。'},
+{tag:'Part5 文法',sub:'語法',lv:2,q:'The manager is ( ) charge of the entire sales division.',c:['at','on','in','by'],a:2,exp:'in charge of〜で「〜の責任者」。'},
+{tag:'Part5 文法',sub:'語法',lv:3,q:'The event will be held rain or ( ).',c:['shine','shining','shines','shone'],a:0,exp:'rain or shineは「雨天決行」の定型表現。'},
+{tag:'Part5 文法',sub:'一致',lv:2,q:'Each of the applicants ( ) required to bring a photo ID.',c:['are','were','is','have been'],a:2,exp:'each of〜は単数扱い。'},
+{tag:'Part5 文法',sub:'一致',lv:2,q:'The staff ( ) informed of the schedule change yesterday.',c:['was','were','is','has'],a:1,exp:'staffは集合名詞で、個々の成員を意識する場合は複数扱い。'},
+{tag:'Part5 文法',sub:'前置詞',lv:2,q:'The conference is scheduled ( ) March 3 ( ) 5.',c:['from / to','on / at','in / on','by / until'],a:0,exp:'期間の起終点はfrom A to B。'},
+{tag:'Part5 文法',sub:'前置詞',lv:2,q:'The discount applies ( ) purchases made online.',c:['on','to','for','with'],a:1,exp:'apply to〜で「〜に適用される」。'},
+{tag:'Part5 文法',sub:'前置詞',lv:3,q:'The report must be submitted ( ) the end of the month.',c:['by','until','till','for'],a:0,exp:'期限はby。'},
+{tag:'Part5 文法',sub:'文型',lv:2,q:'The company appointed Ms. Reyes ( ) the new director.',c:['as','to','for','with'],a:0,exp:'appoint A as Bで「AをBに任命する」。'},
+{tag:'Part5 文法',sub:'文型',lv:3,q:'The new system enables us ( ) reports more quickly.',c:['generate','generating','to generate','generated'],a:2,exp:'enable A to do〜の形。'},
+{tag:'Part5 文法',sub:'語法',lv:1,q:'Please ( ) free to contact me with any questions.',c:['feel','be feeling','felt','feels'],a:0,exp:'命令文なので動詞の原形。feel free to〜で「遠慮なく〜する」。'},
+{tag:'Part5 文法',sub:'語法',lv:2,q:'The store offers same-day delivery ( ) orders placed before noon.',c:['to','for','with','on'],a:1,exp:'offer something for〜で「〜に対して提供する」。'},
+{tag:'Part5 文法',sub:'時制',lv:2,q:'I ( ) for the position since I graduated from college.',c:['work','worked','have worked','had worked'],a:2,exp:'since＋過去の起点は現在完了。'},
+/* ===== Part5 語彙（81〜110） ===== */
+{tag:'Part5 語彙',lv:1,q:'The company will ( ) a new branch in Osaka next spring.',c:['open','opening','opened','openly'],a:0,exp:'助動詞willの後は動詞の原形open。'},
+{tag:'Part5 語彙',lv:2,q:'Please ( ) the enclosed form and return it by mail.',c:['complete','completion','completely','completing'],a:0,exp:'命令文の動詞complete。動詞の原形が入る。'},
+{tag:'Part5 語彙',lv:2,q:'The hotel offers ( ) parking for all guests.',c:['complement','complementary','complimentary','compliment'],a:2,exp:'complimentary parkingで「無料駐車場」。complimentaryは「無料の」の意味もある。'},
+{tag:'Part5 語彙',lv:2,q:'The quarterly ( ) shows a rise in operating profit.',c:['reports','report','reporting','reported'],a:1,exp:'主語は単数のThe quarterly report。'},
+{tag:'Part5 語彙',lv:2,q:'We apologize for the ( ) caused by the system error.',c:['inconvenient','inconvenience','inconveniently','inconveniences'],a:1,exp:'theとcausedの間は名詞inconvenience。'},
+{tag:'Part5 語彙',lv:2,q:'The firm plans to ( ) its workforce by 20 percent.',c:['reduce','reduction','reduced','reducing'],a:0,exp:'to不定詞の後は動詞の原形reduce。'},
+{tag:'Part5 語彙',lv:2,q:'Customers can ( ) their orders online within 24 hours.',c:['cancel','cancellation','canceled','canceling'],a:0,exp:'助動詞canの後は動詞の原形cancel。'},
+{tag:'Part5 語彙',lv:3,q:'The manufacturer offers a two-year ( ) on all appliances.',c:['warranty','warrant','warranted','warranties'],a:0,exp:'保証を意味するwarranty。two-yearの後は単数形。'},
+{tag:'Part5 語彙',lv:2,q:'Please ( ) that all windows are closed before leaving.',c:['ensure','sure','assure','insurance'],a:0,exp:'ensure that〜で「〜を確実にする」。'},
+{tag:'Part5 語彙',lv:3,q:'The two companies agreed to ( ) a joint venture.',c:['establish','establishment','established','establishing'],a:0,exp:'to不定詞の後は動詞の原形establish。'},
+{tag:'Part5 語彙',lv:2,q:'The applicant has ( ) experience in customer service.',c:['extend','extensive','extensively','extension'],a:1,exp:'名詞experienceを修飾する形容詞extensive。'},
+{tag:'Part5 語彙',lv:2,q:'Attendance figures were ( ) higher than last year.',c:['consider','considerable','considerably','consideration'],a:2,exp:'比較級higherを修飾する副詞considerably。'},
+{tag:'Part5 語彙',lv:2,q:'The manager will ( ) the new policy at the meeting.',c:['announce','announcement','announced','announcing'],a:0,exp:'助動詞willの後は動詞の原形announce。'},
+{tag:'Part5 語彙',lv:3,q:'Please keep your receipt as proof of ( ).',c:['purchase','purchasing','purchased','purchaser'],a:0,exp:'proof of purchaseで「購入の証明」。'},
+{tag:'Part5 語彙',lv:2,q:'The hotel is conveniently ( ) near the subway station.',c:['locate','located','location','locating'],a:1,exp:'be located near〜で「〜の近くにある」。'},
+{tag:'Part5 語彙',lv:1,q:'We would like to ( ) our sincere gratitude for your support.',c:['express','expression','expressive','expressed'],a:0,exp:'would like to＋動詞の原形express。'},
+{tag:'Part5 語彙',lv:2,q:'The deadline for ( ) has been extended to May 31.',c:['apply','application','applicant','applied'],a:1,exp:'前置詞forの後は名詞application。'},
+{tag:'Part5 語彙',lv:3,q:'The company attributes its success to ( ) planning.',c:['strategy','strategic','strategically','strategist'],a:1,exp:'名詞planningを修飾する形容詞strategic。'},
+{tag:'Part5 語彙',lv:2,q:'All employees must wear ( ) clothing in the laboratory.',c:['protect','protective','protection','protectively'],a:1,exp:'名詞clothingを修飾する形容詞protective。'},
+{tag:'Part5 語彙',lv:2,q:'The airline offers a 20 percent ( ) for early bookings.',c:['discount','discounts','discounted','discounting'],a:0,exp:'a 20 percent discountで「2割引」。'},
+{tag:'Part5 語彙',lv:3,q:'Please ( ) the attached invoice at your earliest convenience.',c:['settle','settlement','settling','settled'],a:0,exp:'settle an invoiceで「請求書を支払う」。'},
+{tag:'Part5 語彙',lv:2,q:'The new employee quickly ( ) to the company culture.',c:['adapted','adaptation','adaptive','adapting'],a:0,exp:'過去の出来事なので過去形adapted。adapt to〜で「〜に適応する」。'},
+{tag:'Part5 語彙',lv:2,q:'The manager asked for a ( ) of the sales data.',c:['summarize','summary','summarized','summarizing'],a:1,exp:'aの後は名詞summary。'},
+{tag:'Part5 語彙',lv:3,q:'The committee will ( ) the proposal at its next session.',c:['evaluate','evaluation','evaluated','evaluating'],a:0,exp:'助動詞willの後は動詞の原形evaluate。'},
+{tag:'Part5 語彙',lv:2,q:'The conference room can ( ) up to 50 people.',c:['accommodate','accommodation','accommodating','accommodated'],a:0,exp:'助動詞canの後は動詞の原形accommodate。'},
+{tag:'Part5 語彙',lv:2,q:'The package will be ( ) within three business days.',c:['deliver','delivery','delivered','delivering'],a:2,exp:'be＋過去分詞の受動態delivered。'},
+{tag:'Part5 語彙',lv:3,q:'The company decided to ( ) the outdated equipment.',c:['replace','replacement','replaced','replacing'],a:0,exp:'decide to＋動詞の原形replace。'},
+{tag:'Part5 語彙',lv:2,q:'Please ( ) your contact information in the space below.',c:['enter','entry','entered','entering'],a:0,exp:'命令文の動詞enter。'},
+{tag:'Part5 語彙',lv:3,q:'The report highlights the ( ) of remote work.',c:['efficient','efficiency','efficiently','efficiencies'],a:1,exp:'theとofの間は名詞efficiency。'},
+{tag:'Part5 語彙',lv:2,q:'The company will ( ) a survey to gather customer feedback.',c:['conduct','conductive','conduction','conducted'],a:0,exp:'willの後は動詞の原形conduct。conduct a surveyで「調査を行う」。'},
+{tag:'Part5 語彙',lv:1,q:'Please do not ( ) the equipment without permission.',c:['touch','touching','touched','touches'],a:0,exp:'do not＋動詞の原形。'},
+/* ===== Part6 長文穴埋め（111〜120） ===== */
+{tag:'Part6 長文穴埋め',sub:'注文メール',lv:2,q:'空所(9)に最も適するものを選びなさい。\n【本文】Dear Customer, Thank you for your recent order. We are pleased to inform you that your items (9) shipped and should arrive within three days. (10) you have any questions, please contact our support team. We appreciate your (11) and look forward to serving you again. / Sincerely, Online Store Support',c:['have been','has been','is','was'],a:0,exp:'主語your itemsは複数なのでhave been shipped。'},
+{tag:'Part6 長文穴埋め',sub:'注文メール',lv:2,q:'空所(10)に最も適するものを選びなさい。\n【本文】(10) you have any questions, please contact our support team.',c:['If','Unless','Although','Despite'],a:0,exp:'条件を表す接続詞If。'},
+{tag:'Part6 長文穴埋め',sub:'注文メール',lv:2,q:'空所(11)に最も適するものを選びなさい。\n【本文】We appreciate your (11) and look forward to serving you again.',c:['patience','patient','patiently','patients'],a:0,exp:'yourの後は名詞patience（我慢・忍耐）。'},
+{tag:'Part6 長文穴埋め',sub:'会議案内',lv:2,q:'空所(12)に最も適するものを選びなさい。\n【本文】The quarterly review meeting will be held on Friday at 2 p.m. in the main conference room. All department heads are (12) to prepare a short report. Please send your materials to the secretary (13) noon on Thursday.',c:['required','requiring','requirement','require'],a:0,exp:'are required to do〜で「〜することを求められている」。'},
+{tag:'Part6 長文穴埋め',sub:'会議案内',lv:3,q:'空所(13)に最も適するものを選びなさい。\n【本文】Please send your materials to the secretary (13) noon on Thursday.',c:['by','until','since','for'],a:0,exp:'期限はby。'},
+{tag:'Part6 長文穴埋め',sub:'製品案内',lv:2,q:'空所(14)に最も適するものを選びなさい。\n【本文】Our new coffee maker is designed for both home and office use. It is easy to operate and (14) little maintenance. The device comes with a one-year warranty, (15) covers parts and labor.',c:['requires','requirement','required','requiring'],a:0,exp:'主語Itに対する動詞requires。'},
+{tag:'Part6 長文穴埋め',sub:'製品案内',lv:3,q:'空所(15)に最も適するものを選びなさい。\n【本文】The device comes with a one-year warranty, (15) covers parts and labor.',c:['which','who','what','where'],a:0,exp:'先行詞が物で主格の関係代名詞which（継続用法）。'},
+{tag:'Part6 長文穴埋め',sub:'出張報告',lv:3,q:'空所(16)に最も適するものを選びなさい。\n【本文】I returned from the Singapore trade show yesterday. The event was well attended, and we (16) more than 80 new contacts. I will prepare a detailed report (17) the end of this week.',c:['gathered','gathering','gather','gathers'],a:0,exp:'過去の出来事なので過去形gathered。'},
+{tag:'Part6 長文穴埋め',sub:'出張報告',lv:2,q:'空所(17)に最も適するものを選びなさい。\n【本文】I will prepare a detailed report (17) the end of this week.',c:['by','at','on','until'],a:0,exp:'期限を表すby。'},
+{tag:'Part6 長文穴埋め',sub:'社内通知',lv:2,q:'空所(18)に最も適するものを選びなさい。\n【本文】Please note that the elevator will be out of service from Monday to Wednesday for regular maintenance. We apologize for any inconvenience and ask that you use the stairs (18) the repair is completed.',c:['until','by','since','for'],a:0,exp:'継続の終点はuntil。'},
+/* ===== イディオム（121〜135） ===== */
+{tag:'イディオム',sub:'句動詞',lv:1,q:'The meeting was ( ) off because of the storm.',c:['called','put','taken','given'],a:0,exp:'call offで「中止する」。'},
+{tag:'イディオム',sub:'句動詞',lv:1,q:'We need to ( ) up with a new marketing plan.',c:['come','take','look','put'],a:0,exp:'come up with〜で「〜を思いつく」。'},
+{tag:'イディオム',sub:'句動詞',lv:2,q:'The manager will ( ) into the cause of the error.',c:['look','make','take','bring'],a:0,exp:'look into〜で「〜を調査する」。'},
+{tag:'イディオム',sub:'句動詞',lv:2,q:'The company had to ( ) off 30 employees last year.',c:['lay','set','put','take'],a:0,exp:'lay offで「一時解雇する」。'},
+{tag:'イディオム',sub:'句動詞',lv:2,q:'Please ( ) in the form and hand it to the receptionist.',c:['fill','write','put','take'],a:0,exp:'fill in a formで「用紙に記入する」。'},
+{tag:'イディオム',sub:'句動詞',lv:2,q:'The project was ( ) back by two weeks due to supply issues.',c:['put','set','taken','held'],a:0,exp:'put backで「遅らせる・延期する」。'},
+{tag:'イディオム',sub:'句動詞',lv:2,q:'We ran ( ) of printer paper, so please order more.',c:['out','off','over','away'],a:0,exp:'run out of〜で「〜を使い果たす」。'},
+{tag:'イディオム',sub:'句動詞',lv:2,q:'The team was able to ( ) up with the tight schedule.',c:['keep','put','take','make'],a:0,exp:'keep up with〜で「〜に遅れずについていく」。'},
+{tag:'イディオム',sub:'句動詞',lv:3,q:'The new manager ( ) up the position last month.',c:['took','put','set','made'],a:0,exp:'take up a positionで「職に就く」。'},
+{tag:'イディオム',sub:'句動詞',lv:2,q:'Please ( ) out the enclosed reply card and return it.',c:['fill','take','put','set'],a:0,exp:'fill outで「記入する」。fill inと同意。'},
+{tag:'イディオム',sub:'熟語',lv:2,q:'The two departments reached an agreement ( ) the new budget.',c:['on','to','for','with'],a:0,exp:'reach an agreement on〜で「〜で合意する」。'},
+{tag:'イディオム',sub:'熟語',lv:2,q:'The company is ( ) the process of updating its website.',c:['in','on','at','under'],a:0,exp:'in the process of〜で「〜の過程にある」。'},
+{tag:'イディオム',sub:'熟語',lv:2,q:'In ( ) to the base salary, employees receive a bonus twice a year.',c:['addition','additive','additional','added'],a:0,exp:'in addition to〜で「〜に加えて」。'},
+{tag:'イディオム',sub:'熟語',lv:3,q:'The change will take ( ) next quarter.',c:['effect','affect','affection','effective'],a:0,exp:'take effectで「効力を生じる」。'},
+{tag:'イディオム',sub:'熟語',lv:2,q:'Please reply ( ) your earliest convenience.',c:['at','in','on','by'],a:0,exp:'at your earliest convenienceで「都合のつき次第すぐに」。'},
+/* ===== Part7 読解（136〜160） ===== */
+{tag:'Part7 読解',sub:'Eメール',lv:2,q:'【本文】\nFrom: K. Yamada, Sales Manager\nTo: All Sales Staff\nSubject: Monthly targets\n\nPlease note that the monthly sales targets for this quarter have been revised upward by 5 percent. The new targets reflect strong demand in the second half of last year. Individual targets will be sent by the end of the week. If you have concerns about your assigned figure, please schedule a meeting with me before the 10th.\n\n【設問】What has changed?',c:['Sales targets have been raised','The quarter has been extended','A new manager was appointed','The commission rate was reduced'],a:0,exp:'「revised upward by 5 percent」＝引き上げられた。'},
+{tag:'Part7 読解',sub:'Eメール',lv:2,q:'【本文】From: K. Yamada To: All Sales Staff — the monthly sales targets for this quarter have been revised upward by 5 percent. Individual targets will be sent by the end of the week. If you have concerns about your assigned figure, please schedule a meeting with me before the 10th.\n\n【設問】What should staff do if they have concerns about their target?',c:['Arrange a meeting with the manager','Send an e-mail to HR','Wait until the end of the week','Submit a written complaint'],a:0,exp:'「schedule a meeting with me before the 10th」とある。'},
+{tag:'Part7 読解',sub:'お知らせ',lv:2,q:'【本文】\nLIBRARY NOTICE\nThe main library will extend its opening hours during the examination period. From June 5 to June 20, the library will be open until 11 p.m. on weekdays. Borrowed books may be renewed online up to three times. Please note that the group study rooms must be reserved in advance.\n\n【設問】What is NOT mentioned in the notice?',c:['The cost of printing services','The extended opening hours','The renewal limit for books','The reservation policy for study rooms'],a:0,exp:'印刷サービスの料金には触れていない。'},
+{tag:'Part7 読解',sub:'お知らせ',lv:3,q:'【本文】LIBRARY NOTICE — From June 5 to June 20, the library will be open until 11 p.m. on weekdays. Borrowed books may be renewed online up to three times.\n\n【設問】How many times can books be renewed?',c:['Up to two times','Up to three times','Up to five times','Unlimited'],a:1,exp:'「renewed online up to three times」とある。'},
+{tag:'Part7 読解',sub:'求人広告',lv:2,q:'【本文】\nWE ARE HIRING — ASSISTANT CHEF\nThe Riverside Bistro seeks an assistant chef with at least three years of experience. The successful candidate will work Tuesday through Saturday, 10 a.m. to 6 p.m. Benefits include meals, a uniform allowance, and paid training. To apply, send your résumé to jobs@riverside.example before May 30.\n\n【設問】What is required of applicants?',c:['At least three years of experience','A culinary degree','Weekend availability on Sunday','A driver\'s license'],a:0,exp:'「at least three years of experience」が条件。'},
+{tag:'Part7 読解',sub:'求人広告',lv:2,q:'【本文】The Riverside Bistro seeks an assistant chef with at least three years of experience. Work Tuesday through Saturday, 10 a.m. to 6 p.m. Benefits include meals, a uniform allowance, and paid training.\n\n【設問】Which benefit is offered?',c:['Paid training','Free transportation','Housing assistance','Flexible retirement plan'],a:0,exp:'「benefits include ... paid training」とある。'},
+{tag:'Part7 読解',sub:'グラフ読解',lv:3,q:'【本文】表：四半期の売上高（百万円）／第1四半期 80、第2四半期 95、第3四半期 90、第4四半期 120\n【設問】Which quarter showed the largest increase over the previous quarter?',c:['第2四半期','第3四半期','第4四半期','第1四半期'],a:2,exp:'第3→第4が90→120で+30と最大の増加。'},
+{tag:'Part7 読解',sub:'グラフ読解',lv:3,q:'【本文】表：四半期の売上高（百万円）／第1四半期 80、第2四半期 95、第3四半期 90、第4四半期 120\n【設問】What was the total revenue for the year?',c:['360 million yen','385 million yen','400 million yen','420 million yen'],a:1,exp:'80＋95＋90＋120＝385百万円。'},
+{tag:'Part7 読解',sub:'通知',lv:2,q:'【本文】\nOFFICE RELOCATION\nPlease be advised that our Tokyo office will move to the Shinjuku Center Building on August 1. The telephone and fax numbers will remain the same. Our new address has been updated on our website. Deliveries arriving after July 28 should be sent to the new location.\n\n【設問】What will remain unchanged?',c:['The telephone number','The office address','The delivery schedule','The building name'],a:0,exp:'「The telephone and fax numbers will remain the same」とある。'},
+{tag:'Part7 読解',sub:'Eメール',lv:3,q:'【本文】\nDear Ms. Ito,\nWe are writing to confirm your reservation for a conference room on July 12 from 1 p.m. to 5 p.m. The room is equipped with a projector, a whiteboard, and Wi-Fi. Coffee service can be added for an additional 2,000 yen. Please let us know at least three days in advance if you would like this option.\n\n【設問】What costs extra?',c:['Coffee service','The projector','Internet access','Use of the whiteboard'],a:0,exp:'「Coffee service can be added for an additional 2,000 yen」とある。'},
+{tag:'Part7 読解',sub:'Eメール',lv:2,q:'【本文】Dear Ms. Ito, We are writing to confirm your reservation for a conference room on July 12 from 1 p.m. to 5 p.m. ... Please let us know at least three days in advance if you would like this option.\n\n【設問】What is the purpose of the e-mail?',c:['To confirm a room reservation','To advertise a new facility','To cancel an appointment','To request a deposit'],a:0,exp:'予約確認のために送られたメール。'},
+{tag:'Part7 読解',sub:'案内文',lv:2,q:'【本文】\nFITNESS CENTER — NEW HOURS\nBeginning April 1, the fitness center will open at 6 a.m. on weekdays and close at 10 p.m. Weekend hours remain 8 a.m. to 8 p.m. Members may bring one guest per visit at no charge during April. Guest passes are available at the front desk.\n\n【設問】What change takes effect in April?',c:['Weekday opening hours','Weekend closing time','Membership fees','Guest policy for the year'],a:0,exp:'平日の開館が6時になる変更。'},
+{tag:'Part7 読解',sub:'案内文',lv:2,q:'【本文】FITNESS CENTER — NEW HOURS：Beginning April 1, the fitness center will open at 6 a.m. on weekdays and close at 10 p.m. Weekend hours remain 8 a.m. to 8 p.m. Members may bring one guest per visit at no charge during April.\n\n【設問】What is available at the front desk?',c:['Guest passes','Membership cards','Training schedules','Lockers'],a:0,exp:'「Guest passes are available at the front desk」とある。'},
+{tag:'Part7 読解',sub:'メモ',lv:2,q:'【本文】\nMEMO\nTo: Accounting\nFrom: J. Miller\nRe: Software subscription\n\nOur design software subscription expires on September 30. Please renew it for one year and arrange payment by bank transfer. The renewal fee this year is 48,000 yen, which is 3,000 yen higher than last year. Contact the vendor if a purchase order is required.\n\n【設問】What is the renewal fee this year?',c:['45,000 yen','48,000 yen','51,000 yen','3,000 yen'],a:1,exp:'「The renewal fee this year is 48,000 yen」とある。'},
+{tag:'Part7 読解',sub:'メモ',lv:3,q:'【本文】MEMO To: Accounting From: J. Miller Re: Software subscription — Our design software subscription expires on September 30. Please renew it for one year and arrange payment by bank transfer. The renewal fee this year is 48,000 yen, which is 3,000 yen higher than last year.\n\n【設問】How much did the fee increase from last year?',c:['1,000 yen','3,000 yen','4,800 yen','48,000 yen'],a:1,exp:'「3,000 yen higher than last year」とある。'},
+{tag:'Part7 読解',sub:'広告',lv:2,q:'【本文】\nCITY CYCLE SHOP — GRAND OPENING\nVisit our new store on Oak Street this weekend and receive a free helmet with any bicycle purchase. Members who join now pay no registration fee for the first year. We also offer free tune-ups for the first six months.\n\n【設問】What is offered to customers who buy a bicycle this weekend?',c:['A free helmet','A free bicycle lock','A 10 percent discount','A free tune-up for a year'],a:0,exp:'「receive a free helmet with any bicycle purchase」とある。'},
+{tag:'Part7 読解',sub:'広告',lv:3,q:'【本文】CITY CYCLE SHOP — GRAND OPENING：Members who join now pay no registration fee for the first year. We also offer free tune-ups for the first six months.\n\n【設問】What is true about new members?',c:['They pay no registration fee for the first year','They receive two free bicycles','They must pay a monthly fee','They get free tune-ups for two years'],a:0,exp:'「pay no registration fee for the first year」とある。'},
+{tag:'Part7 読解',sub:'ダブルパッセージ',lv:3,q:'【文書1】会議の案内：新製品発表会は6月10日（水）14時から本社ホールで開催。参加希望者は6月5日までに総務部へメールで申し込むこと。駐車場は利用できない。\n【文書2】総務部からの返信：申し込みを受理しました。当日は受付で社員証を提示してください。最寄り駅から徒歩5分です。公共交通機関をご利用ください。\n【設問】What are attendees asked to bring?',c:['Their employee ID','A printed invitation','A parking permit','A laptop computer'],a:0,exp:'文書2に「受付で社員証を提示」とある。'},
+{tag:'Part7 読解',sub:'ダブルパッセージ',lv:3,q:'【文書1】新製品発表会は6月10日（水）14時から本社ホールで開催。参加希望者は6月5日までに総務部へ申し込むこと。駐車場は利用できない。\n【文書2】申し込みを受理しました。当日は受付で社員証を提示してください。最寄り駅から徒歩5分です。\n【設問】How should attendees travel to the venue?',c:['By public transportation','By car','By company shuttle','On foot from the head office'],a:0,exp:'駐車場が使えず、駅から徒歩5分と案内している。'},
+{tag:'Part7 読解',sub:'Eメール',lv:3,q:'【本文】\nDear valued customer,\nYour subscription will automatically renew on October 1. If you wish to cancel, please notify us at least seven days before the renewal date. Cancellations made after that date will be processed at the end of the following month.\n\n【設問】What happens if a customer cancels after the deadline?',c:['The cancellation takes effect at the end of the following month','The customer is charged a penalty','The subscription ends immediately','The customer must pay for a full year'],a:0,exp:'「processed at the end of the following month」とある。'},
+{tag:'Part7 読解',sub:'Eメール',lv:2,q:'【本文】Dear valued customer, Your subscription will automatically renew on October 1. If you wish to cancel, please notify us at least seven days before the renewal date.\n\n【設問】When will the subscription renew?',c:['October 1','September 24','October 7','The end of the month'],a:0,exp:'「renew on October 1」とある。'},
+{tag:'Part7 読解',sub:'表',lv:3,q:'【本文】表：社員研修の受講状況／営業部 受講者24人 完了率75%、総務部 12人 100%、開発部 30人 60%、製造部 40人 90%\n【設問】Which department has the highest completion rate?',c:['営業部','総務部','開発部','製造部'],a:1,exp:'総務部が100%で最高。'},
+{tag:'Part7 読解',sub:'表',lv:2,q:'【本文】表：社員研修の受講状況／営業部 24人 75%、総務部 12人 100%、開発部 30人 60%、製造部 40人 90%\n【設問】How many employees took part in the training in total?',c:['96','106','116','126'],a:1,exp:'24＋12＋30＋40＝106人。'},
+{tag:'Part7 読解',sub:'案内',lv:2,q:'【本文】\nPARKING PERMIT APPLICATION\nEmployees wishing to park on company premises must apply for a permit each year. Applications are accepted in December for the following year. A valid driver\'s license and proof of insurance must be submitted with the application.\n\n【設問】When must employees apply?',c:['In December','In January','Every month','Every two years'],a:0,exp:'「Applications are accepted in December for the following year」とある。'}
+    ];
+
+    function apply(){
+      if(typeof EXAMS==='undefined'||!EXAMS) return false;
+      var e=null;
+      for(var i=0;i<EXAMS.length;i++){ if(EXAMS[i]&&EXAMS[i].id==='toeic'){ e=EXAMS[i]; break; } }
+      if(!e) return false;
+      if(!e.qs) e.qs=[];
+      if(e.__tqp2) return true;
+      var seen={}; for(var k=0;k<e.qs.length;k++){ seen[e.qs[k].q]=1; }
+      for(var j=0;j<TQ2.length;j++){ if(!seen[TQ2[j].q]){ e.qs.push(TQ2[j]); seen[TQ2[j].q]=1; } }
+      e.__tqp2=1;
+      return true;
+    }
+    if(!apply()){
+      var t=setInterval(function(){ if(apply()) clearInterval(t); }, 200);
+      setTimeout(function(){ clearInterval(t); }, 8000);
+    }
+    if(typeof renderTabs==='function'){ try{ renderTabs(); }catch(e){} }
+  }catch(e){ if(window.console) console.error('TOEIC PRACTICE2',e); }
+})();
+/* TOEIC PRACTICE2 END */
+
+</script>
+<script>
+/* TOEIC VOCAB */
+(function(){
+  try{
+    if(!(window.GLOS&&window.GLOS.toeic)) return;
+    var g=window.GLOS.toeic;
+    if(g.__voc) return;
+
+    var CATS=[
+      {cat:'ビジネス語彙① オフィス・業務',short:'語彙①',items:[
+        {t:'colleague',y:'コリーグ',b:'同僚。同じ職場で働く人。coworkerとほぼ同義。'},
+        {t:'supervisor',y:'スーパーバイザー',b:'上司・監督者。部下の業務を管理し指導する立場の人。'},
+        {t:'subordinate',y:'サボーディネイト',b:'部下。上司の指揮下で働く人。'},
+        {t:'deadline',y:'デッドライン',b:'締め切り。作業や提出を終えなければならない期限。'},
+        {t:'schedule',y:'スケジュール',b:'予定・日程。物事を行う日時を定めたもの。'},
+        {t:'agenda',y:'アジェンダ',b:'議題・議事次第。会議で話し合う項目を並べたもの。'},
+        {t:'minutes',y:'ミニッツ',b:'議事録。会議の発言や決定事項を記録した文書。'},
+        {t:'document',y:'ドキュメント',b:'書類・文書。情報を記録した紙や電子ファイル。'},
+        {t:'deadline extension',y:'デッドライン エクステンション',b:'締め切りの延長。期限を先に延ばすこと。'},
+        {t:'workload',y:'ワークロード',b:'業務量。担当する仕事の量。'},
+        {t:'overtime',y:'オーバータイム',b:'残業・時間外労働。所定の労働時間を超えて働くこと。'},
+        {t:'attendance',y:'アテンダンス',b:'出席・出席者数。会議や行事に参加すること。'},
+        {t:'stationery',y:'ステーショナリー',b:'文房具。ペンや紙など事務用品の総称。'},
+        {t:'equipment',y:'イクイップメント',b:'設備・機器。業務に使う道具や装置。'}
+      ]},
+      {cat:'ビジネス語彙② 人事・財務',short:'語彙②',items:[
+        {t:'applicant',y:'アプリカント',b:'応募者・申請者。求人や申し込みに応じた人。'},
+        {t:'résumé',y:'レジュメ',b:'履歴書・職務経歴書。応募時に提出する経歴の書類。'},
+        {t:'candidate',y:'キャンディデイト',b:'候補者。採用や選考の対象となる人。'},
+        {t:'interview',y:'インタビュー',b:'面接・聞き取り調査。'},
+        {t:'orientation',y:'オリエンテーション',b:'新任者向けの説明会。業務や組織の概要を伝える。'},
+        {t:'probation',y:'プロベイション',b:'試用期間。本採用の前に能力を見る期間。'},
+        {t:'retirement',y:'リタイアメント',b:'退職・引退。'},
+        {t:'salary',y:'サラリー',b:'給与。月給や年俸として支払われる報酬。'},
+        {t:'bonus',y:'ボーナス',b:'賞与。基本給とは別に支払われる報酬。'},
+        {t:'budget',y:'バジェット',b:'予算。一定期間に使うと計画した金額。'},
+        {t:'revenue',y:'レベニュー',b:'収益・売上高。事業活動から得られる収入。'},
+        {t:'expense',y:'エクスペンス',b:'経費・費用。業務のために支出するお金。'},
+        {t:'invoice',y:'インボイス',b:'請求書。代金の支払いを求める書類。'},
+        {t:'receipt',y:'レシート',b:'領収書。支払いが済んだことを証明する書類。'},
+        {t:'reimbursement',y:'リインバースメント',b:'払い戻し・経費精算。立て替えた費用の返金。'},
+        {t:'transaction',y:'トランザクション',b:'取引・処理。売買や金銭のやり取り。'},
+        {t:'audit',y:'オーディット',b:'会計監査。帳簿や財務を検査すること。'},
+        {t:'profit',y:'プロフィット',b:'利益。収入から費用を差し引いた残り。'},
+        {t:'estimate',y:'エスティメイト',b:'見積もり。費用や数量の概算。'},
+        {t:'quarterly',y:'クォータリー',b:'四半期ごとの。3か月単位で行われること。'}
+      ]},
+      {cat:'ビジネス語彙③ 営業・物流・旅行',short:'語彙③',items:[
+        {t:'negotiate',y:'ネゴシエイト',b:'交渉する。条件を話し合って合意を目指す。'},
+        {t:'promotion',y:'プロモーション',b:'販売促進・昇進。商品の売り込み、または役職が上がること。'},
+        {t:'launch',y:'ローンチ',b:'発売・開始。新製品や事業を始めること。'},
+        {t:'campaign',y:'キャンペーン',b:'販促活動。一定の目的で行う宣伝の取り組み。'},
+        {t:'customer',y:'カスタマー',b:'顧客。商品やサービスを利用する人。'},
+        {t:'client',y:'クライアント',b:'顧客・依頼人。継続的に取引する相手。'},
+        {t:'survey',y:'サーベイ',b:'調査・アンケート。意見や傾向を調べること。'},
+        {t:'warranty',y:'ワランティ',b:'保証・保証書。製品の欠陥などに対する補償。'},
+        {t:'refund',y:'リファンド',b:'返金。支払われた代金を返すこと。'},
+        {t:'shipment',y:'シップメント',b:'発送・積荷。商品を送り出すこと、または送られた荷物。'},
+        {t:'inventory',y:'インベントリー',b:'在庫・棚卸し。保有している商品の数量。'},
+        {t:'warehouse',y:'ウェアハウス',b:'倉庫。商品を保管する施設。'},
+        {t:'supplier',y:'サプライヤー',b:'供給業者・納入業者。商品や部品を納める会社。'},
+        {t:'delivery',y:'デリバリー',b:'配送・配達。商品を届けること。'},
+        {t:'itinerary',y:'アイティナラリー',b:'旅程表。旅行や出張の日程をまとめた表。'},
+        {t:'venue',y:'ヴェニュー',b:'会場。催し物や会議が行われる場所。'},
+        {t:'accommodation',y:'アコモデーション',b:'宿泊施設・宿泊。'},
+        {t:'reservation',y:'リザベーション',b:'予約。座席や部屋を事前に確保すること。'},
+        {t:'boarding pass',y:'ボーディングパス',b:'搭乗券。航空機に乗るための券。'},
+        {t:'layover',y:'レイオーバー',b:'乗り継ぎの待ち時間。flight connectionともいう。'}
+      ]},
+      {cat:'類義語・紛らわしい語',short:'類義語',items:[
+        {t:'affect / effect',y:'アフェクト／エフェクト',b:'affectは動詞で「影響を与える」、effectは名詞で「影響・効果」。'},
+        {t:'advice / advise',y:'アドバイス／アドバイズ',b:'adviceは名詞「助言」、adviseは動詞「助言する」。'},
+        {t:'personnel / personal',y:'パーソネル／パーソナル',b:'personnelは「人事・職員」、personalは「個人の・私的な」。'},
+        {t:'principal / principle',y:'プリンシパル／プリンシプル',b:'principalは「主要な・校長」、principleは「原則・原理」。'},
+        {t:'compliment / complement',y:'コンプリメント／コンプリメント',b:'complimentは「ほめる・称賛」、complementは「補完する」。'},
+        {t:'confirm / conform',y:'コンファーム／コンフォーム',b:'confirmは「確認する」、conformは「従う・適合する」。'},
+        {t:'desert / dessert',y:'デザート／デザート',b:'desertは「砂漠・去る」、dessertは「デザート」。'},
+        {t:'accept / except',y:'アクセプト／エクセプト',b:'acceptは「受け入れる」、exceptは「〜を除いて」。'},
+        {t:'rise / raise',y:'ライズ／レイズ',b:'riseは自動詞「上がる」、raiseは他動詞「上げる」。'},
+        {t:'borrow / lend',y:'ボロー／レンド',b:'borrowは「借りる」、lendは「貸す」。'},
+        {t:'remind / remember',y:'リマインド／リメンバー',b:'remindは「人に思い出させる」、rememberは「自分が覚えている」。'},
+        {t:'economic / economical',y:'エコノミック／エコノミカル',b:'economicは「経済の」、economicalは「経済的な・節約になる」。'},
+        {t:'sensible / sensitive',y:'センシブル／センシティブ',b:'sensibleは「分別のある」、sensitiveは「敏感な・繊細な」。'},
+        {t:'temporary / contemporary',y:'テンポラリー／コンテンポラリー',b:'temporaryは「一時的な」、contemporaryは「現代の・同時代の」。'},
+        {t:'attend / attempt',y:'アテンド／アテンプト',b:'attendは「出席する」、attemptは「試みる」。'},
+        {t:'increase / enlarge',y:'インクリーズ／エンラージ',b:'increaseは数量の増加、enlargeは大きさ・規模を大きくすること。'},
+        {t:'hire / fire',y:'ハイアー／ファイアー',b:'hireは「雇う」、fireは「解雇する」。'},
+        {t:'fee / fare / toll',y:'フィー／フェア／トール',b:'feeは役務の料金、fareは乗車運賃、tollは道路の通行料。'},
+        {t:'adequate / accurate',y:'アデクォート／アキュレット',b:'adequateは「十分な」、accurateは「正確な」。'},
+        {t:'considerable / considerate',y:'コンシダラブル／コンシダレット',b:'considerableは「かなりの」、considerateは「思いやりのある」。'}
+      ]},
+      {cat:'イディオム・句動詞',short:'句動詞',items:[
+        {t:'call off',y:'コール オフ',b:'中止する。予定していた催しを取りやめる（＝cancel）。'},
+        {t:'put off',y:'プット オフ',b:'延期する。実施を先に延ばす（＝postpone）。'},
+        {t:'come up with',y:'カム アップ ウィズ',b:'思いつく。案や解決策をひらめく。'},
+        {t:'look into',y:'ルック イントゥ',b:'調査する。問題の原因などを詳しく調べる。'},
+        {t:'look forward to',y:'ルック フォワード トゥ',b:'楽しみに待つ。toの後は動名詞が続く。'},
+        {t:'fill in / fill out',y:'フィル イン／フィル アウト',b:'用紙に記入する。空欄を埋める。'},
+        {t:'run out of',y:'ラン アウト オブ',b:'使い果たす。在庫や時間がなくなる。'},
+        {t:'keep up with',y:'キープ アップ ウィズ',b:'遅れずについていく。ペースを維持する。'},
+        {t:'lay off',y:'レイ オフ',b:'一時解雇する。業績悪化などで従業員を削減する。'},
+        {t:'take over',y:'テイク オーバー',b:'引き継ぐ・買収する。業務や会社を引き受ける。'},
+        {t:'carry out',y:'キャリー アウト',b:'実行する。計画や指示を実際に行う（＝conduct）。'},
+        {t:'turn down',y:'ターン ダウン',b:'断る・却下する。提案や申し出を拒否する。'},
+        {t:'bring up',y:'ブリング アップ',b:'話題に出す・育てる。会議などで議題に挙げる。'},
+        {t:'go over',y:'ゴー オーバー',b:'見直す・確認する。資料を読み返して点検する。'},
+        {t:'set up',y:'セット アップ',b:'設置する・設立する。機器を組み立てたり組織を作る。'},
+        {t:'draw up',y:'ドロー アップ',b:'作成する。契約書や計画書を書き上げる。'},
+        {t:'point out',y:'ポイント アウト',b:'指摘する。問題点をはっきり示す。'},
+        {t:'figure out',y:'フィギュア アウト',b:'理解する・解決する。答えを導き出す。'},
+        {t:'work out',y:'ワーク アウト',b:'うまくいく・解決する・運動する。文脈で意味が変わる。'},
+        {t:'cut down on',y:'カット ダウン オン',b:'減らす。費用や量を削減する。'},
+        {t:'catch up on',y:'キャッチ アップ オン',b:'遅れを取り戻す。たまった仕事や情報を処理する。'},
+        {t:'drop by',y:'ドロップ バイ',b:'立ち寄る。short visitの意味。'},
+        {t:'get along with',y:'ゲット アロング ウィズ',b:'仲良くやっていく。人とうまく付き合う。'},
+        {t:'hold off',y:'ホールド オフ',b:'延期する・控える。決断を先延ばしにする。'}
+      ]},
+      {cat:'イディオム・熟語',short:'熟語',items:[
+        {t:'in charge of',y:'イン チャージ オブ',b:'〜の責任者で。担当している。'},
+        {t:'in advance',y:'イン アドバンス',b:'前もって・事前に。'},
+        {t:'ahead of schedule',y:'アヘッド オブ スケジュール',b:'予定より早く。前倒しで。'},
+        {t:'behind schedule',y:'ビハインド スケジュール',b:'予定より遅れて。'},
+        {t:'on behalf of',y:'オン ビハーフ オブ',b:'〜を代表して・〜に代わって。'},
+        {t:'in terms of',y:'イン タームズ オブ',b:'〜の観点で・〜の面では。'},
+        {t:'as a result of',y:'アズ ア リザルト オブ',b:'〜の結果として。'},
+        {t:'due to',y:'デュー トゥ',b:'〜のために・〜が原因で。名詞句を伴う。'},
+        {t:'in addition to',y:'イン アディション トゥ',b:'〜に加えて。'},
+        {t:'in the process of',y:'イン ザ プロセス オブ',b:'〜の途中で・〜の過程にある。'},
+        {t:'take effect',y:'テイク エフェクト',b:'効力を生じる。規則や制度が発効する。'},
+        {t:'take into account',y:'テイク イントゥ アカウント',b:'考慮に入れる。'},
+        {t:'make up for',y:'メイク アップ フォー',b:'埋め合わせる・補う。'},
+        {t:'on time / in time',y:'オン タイム／イン タイム',b:'on timeは時間どおりに、in timeは間に合って。'},
+        {t:'at your earliest convenience',y:'アット ユア アーリエスト コンヴィニエンス',b:'都合がつき次第すぐに。ビジネスメールの定型表現。'},
+        {t:'reach an agreement',y:'リーチ アン アグリーメント',b:'合意に達する。agreementの前の前置詞はon。'}
+      ]}
+    ];
+
+    for(var i=0;i<CATS.length;i++) g.cats.push(CATS[i]);
+
+    /* 既存「用語」タブ用の terms も再同期 */
+    try{
+      if(typeof EXAMS!=='undefined'&&EXAMS){
+        for(var e=0;e<EXAMS.length;e++){
+          var ex=EXAMS[e]; if(!ex||ex.id!=='toeic') continue;
+          var arr=[],cs=g.cats||[];
+          for(var c=0;c<cs.length;c++){ var its=cs[c].items||[];
+            for(var k=0;k<its.length;k++){ if(its[k].t&&its[k].b) arr.push({t:its[k].t,b:its[k].b}); } }
+          ex.terms=arr;
+        }
+      }
+    }catch(e2){}
+
+    g.__voc=1;
+  }catch(e){ if(window.console) console.error('TOEIC VOCAB',e); }
+})();
+/* TOEIC VOCAB END */
 
 </script>
 </body>
