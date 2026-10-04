@@ -21102,6 +21102,7 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
 
 
 
+
 <script>/* TOEIC LISTEN */
 /* TOEIC LISTEN */
 (function(){
@@ -21121,7 +21122,7 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
     function saveLog(){ try{ localStorage.setItem(LK,JSON.stringify(LOG)); }catch(e){} }
     loadLog();
 
-    var st={mode:'p1',idx:{p1:0,p2:0,p3:0,p4:0,drill:0},rate:1,pick:{},played:0,token:0,speedOpen:false};
+    var st={mode:'p1',idx:{p1:0,p2:0,p3:0,p4:0,drill:0},rate:1,pick:{},played:0,token:0,speedOpen:false,audio:null};
 
     var CSS=[
       '.lst{color:var(--ink);font-size:13px;line-height:1.75}',
@@ -21165,6 +21166,7 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
       '.lst-nv:hover{border-color:#8FB0CC}',
       '.lst-nv:disabled{opacity:.4;cursor:default}',
       '.lst-hint{font-size:11px;color:#8A6A18;background:#FBF7EA;border:1px solid #E8DCB8;border-radius:7px;padding:7px 10px;margin:10px 0 0;line-height:1.65}',
+      '.lst-spdwrap{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:3px 10px}','.lst-spdwrap input[type=range]{width:118px;accent-color:#1E4A75;cursor:pointer}','.lst-spdv{font-family:"IBM Plex Mono",monospace;font-size:11px;color:#1E4A75;min-width:40px;text-align:right}',
       '.lst-photo{margin:0 0 12px}','.lst-photo img{width:100%;max-width:560px;border-radius:10px;border:1px solid var(--line);display:block;background:#E7EDF3}',
       '.lst-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(30px,1fr));gap:4px;margin:10px 0 0}',
       '.lst-cell{height:22px;border-radius:4px;background:#E7EDF3;border:1px solid var(--line);font-size:0;cursor:pointer}',
@@ -21211,7 +21213,8 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
         if(my!==st.token) return;
         if(i>=files.length){ if(onDone) onDone(); return; }
         var a=new Audio(BASE+files[i]);
-        try{ a.playbackRate=st.rate; }catch(e){}
+        try{ a.playbackRate=st.rate; a.preservesPitch=true; }catch(e){}
+        st.audio=a;
         a.onended=function(){ if(my!==st.token) return; var g=gaps[i]||260; i++; setTimeout(step,g); };
         a.onerror=function(){ if(my!==st.token) return; i++; setTimeout(step,50); };
         var pr=a.play(); if(pr&&pr.catch) pr.catch(function(){});
@@ -21307,26 +21310,15 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
          '<span class="lst-prog">この分野の記録：挑戦 <b>'+pr.n+'</b> / '+pr.t+'　正解 '+pr.c+'</span></div>';
 
       if(it.img) h+='<div class="lst-photo"><img src="'+it.img+'" alt="Part1の写真"></div>';
-      if(st.mode==='p1'||st.mode==='p2'||st.mode==='p3'||st.mode==='p4'){
-        h+='<div class="lst-play">'+
-           '<button class="lst-go" id="lst-play">▶ 音声を再生</button>'+
-           '<button class="lst-sq" id="lst-stop" title="停止">■</button>'+
-           '<span class="lst-rate">'+
-             '<button data-rate="1" class="'+(st.rate===1?'on':'')+'">1.0×</button>'+
-             '<button data-rate="0.85" class="'+(st.rate===0.85?'on':'')+'">0.85×</button>'+
-             '<button data-rate="1.15" class="'+(st.rate===1.15?'on':'')+'">1.15×</button>'+
-           '</span>'+
-           '<span class="lst-cnt">再生 '+st.played+' 回</span>'+
-           '</div>';
-      } else {
-        h+='<div class="lst-play"><button class="lst-go" id="lst-play">▶ 音声を再生</button>'+
-           '<button class="lst-sq" id="lst-stop" title="停止">■</button>'+
-           '<span class="lst-rate">'+
-             '<button data-rate="1" class="'+(st.rate===1?'on':'')+'">1.0×</button>'+
-             '<button data-rate="0.85" class="'+(st.rate===0.85?'on':'')+'">0.85×</button>'+
-           '</span><span class="lst-cnt">再生 '+st.played+' 回</span></div>';
-      }
-
+      h+='<div class="lst-play">'+
+         '<button class="lst-go" id="lst-play">▶ 音声を再生</button>'+
+         '<button class="lst-sq" id="lst-stop" title="停止">■</button>'+
+         '<span class="lst-spdwrap"><input type="range" id="lst-spd" min="0.5" max="2" step="0.05" value="'+st.rate+'" aria-label="再生速度"><span class="lst-spdv" id="lst-spdv">'+st.rate.toFixed(2)+'×</span></span>'+
+         '<span class="lst-rate">'+
+           [0.5,0.75,1,1.25,1.5,2].map(function(r){return '<button data-rate="'+r+'" class="'+(Math.abs(st.rate-r)<0.001?'on':'')+'">'+r+'×</button>';}).join('')+
+         '</span>'+
+         '<span class="lst-cnt">再生 '+st.played+' 回</span>'+
+         '</div>';
       h+=bodyHTML(it);
 
       h+='<div class="lst-nav" style="margin-top:12px">'+
@@ -21347,7 +21339,7 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
       }
       h+='</div></div>';
 
-      h+='<div class="lst-hint">音声が再生されない場合は、ページを再読み込みするか、ブラウザの自動再生設定をご確認ください。'+
+      h+='<div class="lst-hint">再生速度は <b>0.5倍〜2.0倍</b> のスライダー、または 0.5／0.75／1.0／1.25／1.5／2.0 のボタンで変更できます（速度を変えても声の高さは変わりません）。Part1・Part2の音声は選択肢番号（A・B・C…）を読み上げます。'+
          '配布用の単体ファイル（ZIP）で使う場合は、同じフォルダに <b>audio</b> フォルダが必要です。</div>';
       h+='</div>';
       return h;
@@ -21356,6 +21348,15 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
     function wire(){
       var root=document.querySelector('#panels .lst');
       if(!root) return;
+
+      root.addEventListener('input',function(ev){
+        var t=ev.target;
+        if(t&&t.id==='lst-spd'){
+          st.rate=parseFloat(t.value);
+          var v=document.getElementById('lst-spdv'); if(v) v.textContent=st.rate.toFixed(2)+'×';
+          if(st.audio){ try{ st.audio.playbackRate=st.rate; }catch(e){} }
+        }
+      });
 
       root.addEventListener('click',function(ev){
         var t=ev.target;
@@ -21366,7 +21367,7 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
         if(mb){ stopAudio(); st.mode=mb; st.played=0; draw(); return; }
 
         var rt=t.getAttribute&&t.getAttribute('data-rate');
-        if(rt){ st.rate=parseFloat(rt); draw(); return; }
+        if(rt){ st.rate=parseFloat(rt); if(st.audio){try{st.audio.playbackRate=st.rate;}catch(e){}} draw(); return; }
 
         var jp=t.getAttribute&&t.getAttribute('data-jump');
         if(jp!==null&&jp!==undefined&&jp!==''){ stopAudio(); st.idx[st.mode]=parseInt(jp,10); st.played=0; draw(); return; }
