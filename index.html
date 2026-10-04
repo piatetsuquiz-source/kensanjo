@@ -21099,6 +21099,7 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
 })();
 /* TOEIC FIGURE END */
 </script>
+
 <script>/* TOEIC LISTEN */
 /* TOEIC LISTEN */
 (function(){
@@ -21173,7 +21174,7 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
     }
 
     function list(m){ return DATA[m]||[]; }
-    function cur(){ var a=list(st.mode); return a[st.idx[st.mode]]||null; }
+    function curIt(){ var a=list(st.mode); return a[st.idx[st.mode]]||null; }
     function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
     function pl(i){ return String.fromCharCode(65+i); }
     function resKey(id){ return id; }
@@ -21276,7 +21277,7 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
     }
 
     function html(){
-      var it=cur();
+      var it=curIt();
       var pr=progress(st.mode);
       var h='<div class="lst">';
       h+='<h3>リスニング対策</h3>';
@@ -21361,20 +21362,20 @@ window.GLOS={"torohan":{"intro":"登録販売者試験で問われる医薬品�
         var jp=t.getAttribute&&t.getAttribute('data-jump');
         if(jp!==null&&jp!==undefined&&jp!==''){ stopAudio(); st.idx[st.mode]=parseInt(jp,10); st.played=0; draw(); return; }
 
-        if(t.id==='lst-play'){ var it=cur(); if(it) playSeq(it.files,gapsFor(it),null); drawCount(); return; }
+        if(t.id==='lst-play'){ var it=curIt(); if(it) playSeq(it.files,gapsFor(it),null); drawCount(); return; }
         if(t.id==='lst-stop'){ stopAudio(); return; }
         if(t.id==='lst-prev'){ stopAudio(); st.idx[st.mode]=Math.max(0,st.idx[st.mode]-1); st.played=0; draw(); return; }
         if(t.id==='lst-next'){ stopAudio(); st.idx[st.mode]=Math.min(list(st.mode).length-1,st.idx[st.mode]+1); st.played=0; draw(); return; }
 
         if(t.id==='lst-markok'){
-          var it2=cur(); if(!it2) return;
+          var it2=curIt(); if(!it2) return;
           LOG[it2.id]=1; saveLog(); draw(); return;
         }
 
         var ch=t.getAttribute&&t.getAttribute('data-ch');
         if(ch!==null&&ch!==undefined&&ch!==''){
           var qi=t.getAttribute('data-q');
-          var itm=cur(); if(!itm) return;
+          var itm=curIt(); if(!itm) return;
           if(qi!==null&&qi!==undefined&&qi!==''){
             var kk=itm.id+'#'+qi;
             if(typeof st.pick[kk]==='number') return;
