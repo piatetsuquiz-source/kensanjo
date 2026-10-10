@@ -23660,60 +23660,82 @@ window.__TOC_EXTRA2=[
 
 </script>
 <script>
-/* TOC REVIEW PATCHED */
+/* TOC REVIEW2 PATCHED */
 (function(){
   try{
-    if(window.__TOCREV_APPLIED) return; window.__TOCREV_APPLIED=1;
-    var LK='gk_toc_log';
-    function T(){ var a=EXAMS.filter(function(e){ return e.id==='torohan'; }); return a[0]; }
-    function loadLOG(){ try{ var r=JSON.parse(localStorage.getItem(LK)||'null'); if(r&&r.q) return r; }catch(e){} return {q:{},d:{}}; }
-    function saveLOG(L){ try{ localStorage.setItem(LK,JSON.stringify(L)); }catch(e){} }
+    if(window.__TOCREV2_APPLIED) return; window.__TOCREV2_APPLIED=1;
+    var TLOG='gk_toc_log', STORE='sanshi-study-v1';
+    function curEx(){ try{ return (typeof cur!=='undefined')?cur:null; }catch(e){ return null; } }
+    function getS(){ try{ if(typeof S!=='undefined'&&S) return S; }catch(e){} return null; }
+    function readStore(){ try{ return JSON.parse(localStorage.getItem(STORE)||'null')||{}; }catch(e){ return {}; } }
+    function writeStore(o){ try{ localStorage.setItem(STORE,JSON.stringify(o)); }catch(e){} }
+    function readTocLog(){ try{ var r=JSON.parse(localStorage.getItem(TLOG)||'null'); if(r&&r.q) return r; }catch(e){} return {q:{}}; }
+    function writeTocLog(L){ try{ localStorage.setItem(TLOG,JSON.stringify(L)); }catch(e){} }
+
     function wrongList(){
-      var L=loadLOG(), t=T(), out=[];
-      if(!t) return out;
-      Object.keys(L.q).forEach(function(k){ if(L.q[k]===0){ var i=parseInt(k,10); if(t.qs[i]) out.push(i); } });
-      return out;
+      var e=curEx(); if(!e||!e.qs) return [];
+      var set={}, pre=e.id+':', Sx=getS();
+      var res=(Sx&&Sx.res)?Sx.res:(readStore().res||{});
+      Object.keys(res).forEach(function(k){
+        if(k.indexOf(pre)===0 && res[k]===0){ var i=parseInt(k.slice(pre.length),10); if(e.qs[i]) set[i]=1; }
+      });
+      if(e.id==='torohan'){
+        var L=readTocLog();
+        Object.keys(L.q||{}).forEach(function(k){ if(L.q[k]===0){ var i=parseInt(k,10); if(e.qs[i]) set[i]=1; } });
+      }
+      return Object.keys(set).map(function(k){ return parseInt(k,10); });
+    }
+    function mark(i, ok){
+      var e=curEx(); if(!e) return;
+      var Sx=getS();
+      if(Sx){ Sx.res=Sx.res||{}; Sx.res[e.id+':'+i]=ok?1:0; if(typeof save==='function'){ try{ save(); }catch(_){} } }
+      else { var st=readStore(); st.res=st.res||{}; st.res[e.id+':'+i]=ok?1:0; writeStore(st); }
+      if(e.id==='torohan'){ var L=readTocLog(); L.q=L.q||{}; if(ok){ delete L.q[i]; } else { L.q[i]=0; } writeTocLog(L); }
     }
     function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function sh(a){ for(var z=a.length-1;z>0;z--){ var j=Math.floor(Math.random()*(z+1)),x=a[z]; a[z]=a[j]; a[j]=x; } return a; }
     var st={order:[],i:0,picked:null,right:0,done:0,started:false,finished:false};
 
-    function build(){ var t=T(); if(!t) return; st.order=sh(wrongList().slice()); st.i=0; st.picked=null; st.right=0; st.done=0; st.finished=false; st.started=true; }
+    function build(){ st.order=sh(wrongList().slice()); st.i=0; st.picked=null; st.right=0; st.done=0; st.finished=false; st.started=true; }
 
     function qCard(){
-      var t=T(), idx=st.order[st.i];
+      var e=curEx(), idx=st.order[st.i];
       if(idx===undefined){ st.finished=true; return ''; }
-      var q=t.qs[idx], picked=st.picked, choices='';
+      var q=e.qs[idx], picked=st.picked, choices='';
       for(var z=0;z<q.c.length;z++){
         var cls=''; if(picked!==null){ if(z===q.a) cls=' right'; else if(z===picked) cls=' wrong'; }
-        choices+='<button class="choice'+cls+'" data-revpick="'+z+'"'+(picked!==null?' disabled':'')+'><span class="no">'+(z+1)+'</span><span>'+esc(q.c[z])+'</span></button>';
+        choices+='<button class="choice'+cls+'" data-rev2pick="'+z+'"'+(picked!==null?' disabled':'')+'><span class="no">'+(z+1)+'</span><span>'+esc(q.c[z])+'</span></button>';
       }
       var v='';
       if(picked!==null){
         var ok=(picked===q.a);
         v='<div class="verdict"><div class="verdict-h"><span class="v '+(ok?'ok':'no')+'">'+(ok?'○ 正解':'× 不正解')+'</span><span class="tag">正解 '+(q.a+1)+'</span></div><p class="exp">'+esc(q.exp||'')+'</p>'+(ok?'<p class="exp" style="color:#1D6B4E">正解できたので、この問題は復習リストから外しました。</p>':'<p class="exp" style="color:#C0392B">この問題は復習リストに残ります。</p>')+'</div>';
       }
-      return '<div class="qmeta"><span class="chip">復習</span><span class="chip bare">'+esc(q.tag||'')+'</span><span class="chip bare">'+esc(q.__day||'')+'</span>'+
-        '<span class="qprog">'+(st.i+1)+' / '+st.order.length+'　正解 '+st.right+'</span></div>'+
+      var meta='<span class="chip">復習</span>';
+      if(q.tag) meta+='<span class="chip bare">'+esc(q.tag)+'</span>';
+      if(q.sub) meta+='<span class="chip bare">'+esc(q.sub)+'</span>';
+      meta+='<span class="qprog">'+(st.i+1)+' / '+st.order.length+'　正解 '+st.right+'</span>';
+      return '<div class="qmeta">'+meta+'</div>'+
         '<div class="card"><p class="qtext">'+esc(q.q)+'</p><div class="choices">'+choices+'</div>'+v+
         '<div class="qfoot">'+(picked===null
           ? '<span style="font-size:13px;color:#4A5A70;font-weight:600">選択肢を選ぶと採点されます</span>'
-          : '<button class="btn" data-revnext="1">'+(st.i+1<st.order.length?'次の問題へ':'結果を見る')+'</button>')+
+          : '<button class="btn" data-rev2next="1">'+(st.i+1<st.order.length?'次の問題へ':'結果を見る')+'</button>')+
         '</div></div>';
     }
 
     function html(){
+      var e=curEx(); if(!e) return '';
       var n=wrongList().length, h='';
-      h+='<section class="sec-head"><h2>復習（誤答の解き直し）</h2><span class="bar"></span><span class="note">目次別演習で間違えた問題だけをもう一度出題します。正解すると自動でリストから外れます</span></section>';
+      h+='<section class="sec-head"><h2>復習（誤答の解き直し）</h2><span class="bar"></span><span class="note">'+esc(e.name)+'の「演習」で間違えた問題だけをもう一度出題します。正解すると自動でリストから外れます</span></section>';
       if(!n && !st.started){
-        h+='<div class="card"><p class="toc-cap">現在、復習すべき誤答はありません。目次別演習を進めると、間違えた問題がここにたまります。</p>'+
-           '<div class="qfoot" style="margin-top:14px"><button class="btn ghost mini" data-revto="1">目次別演習へ</button></div></div>';
+        h+='<div class="card"><p class="toc-cap">現在、'+esc(e.name)+'で復習すべき誤答はありません。「演習」タブを進めると、間違えた問題がここにたまります。</p>'+
+           '<div class="qfoot" style="margin-top:14px"><button class="btn ghost mini" data-rev2to="1">演習へ</button></div></div>';
         return h;
       }
       if(!st.started){
-        h+='<div class="card"><div class="tlegend" style="border-top:0;padding-top:0"><span>復習リストに <b>'+n+'問</b> あります。</span></div>'+
-           '<div class="qfoot" style="margin-top:14px"><button class="btn" data-revstart="1">復習をはじめる（'+n+'問）</button>'+
-           '<button class="btn ghost mini" data-revto="1">目次別演習へ</button></div></div>';
+        h+='<div class="card"><div class="tlegend" style="border-top:0;padding-top:0"><span>「演習」で間違えた問題が <b>'+n+'問</b> たまっています。</span></div>'+
+           '<div class="qfoot" style="margin-top:14px"><button class="btn" data-rev2start="1">復習をはじめる（'+n+'問）</button>'+
+           '<button class="btn ghost mini" data-rev2to="1">演習へ</button></div></div>';
         return h;
       }
       if(st.finished){
@@ -23724,38 +23746,37 @@ window.__TOC_EXTRA2=[
            '<div class="stat"><div class="stat-k">出題数</div><div class="stat-v">'+st.done+'<small>問</small></div></div>'+
            '<div class="stat"><div class="stat-k">正答率</div><div class="stat-v">'+rt+'<small>%</small></div></div>'+
            '</div><div class="qfoot" style="margin-top:14px">'+
-           (left?'<button class="btn" data-revstart="1">残り'+left+'問を復習</button>':'')+
-           '<button class="btn ghost mini" data-revto="1">目次別演習へ</button></div>'+
+           (left?'<button class="btn" data-rev2start="1">残り'+left+'問を復習</button>':'')+
+           '<button class="btn ghost mini" data-rev2to="1">演習へ</button></div>'+
            (left?'':'<p class="toc-cap" style="margin-top:12px">復習リストは空になりました。よくできました。</p>')+'</div>';
         return h;
       }
       return qCard();
     }
 
+    function goTab(t){ try{ tab=t; renderTabs(); renderPanel(); }catch(e){} }
     function draw(){ var host=document.getElementById('panels'); if(!host) return; host.innerHTML='<section class="panel on">'+html()+'</section>'; }
 
     document.addEventListener('click',function(ev){
       var el=ev.target;
-      while(el&&el!==document&&!(el.getAttribute&&(el.getAttribute('data-revpick')||el.getAttribute('data-revnext')||el.getAttribute('data-revstart')||el.getAttribute('data-revto')))) el=el.parentNode;
+      while(el&&el!==document&&!(el.getAttribute&&(el.getAttribute('data-rev2pick')||el.getAttribute('data-rev2next')||el.getAttribute('data-rev2start')||el.getAttribute('data-rev2to')))) el=el.parentNode;
       if(!el||el===document) return;
-      if(typeof cur==='undefined'||!cur||cur.id!=='torohan') return;
       if(typeof tab==='undefined'||tab!=='rev') return;
-      var v;
-      v=el.getAttribute('data-revstart');
+      if(!curEx()) return;
+      var v, e=curEx();
+      v=el.getAttribute('data-rev2start');
       if(v!==null&&v!==undefined&&v!==''){ build(); draw(); return; }
-      if(el.getAttribute('data-revto')){ tab='toc'; try{ renderTabs(); }catch(e){} try{ renderPanel(); }catch(e){} return; }
-      v=el.getAttribute('data-revpick');
+      if(el.getAttribute('data-rev2to')){ goTab('drill'); return; }
+      v=el.getAttribute('data-rev2pick');
       if(v!==null&&v!==undefined&&v!==''){
         if(st.picked!==null) return;
         var idx=st.order[st.i]; if(idx===undefined) return;
-        var t=T(), q=t.qs[idx], p=parseInt(v,10);
+        var q=e.qs[idx], p=parseInt(v,10);
         st.picked=p; st.done++;
         var ok=(p===q.a); if(ok) st.right++;
-        var L=loadLOG();
-        if(ok){ delete L.q[idx]; } else { L.q[idx]=0; }
-        saveLOG(L); draw(); return;
+        mark(idx, ok); draw(); return;
       }
-      if(el.getAttribute('data-revnext')){
+      if(el.getAttribute('data-rev2next')){
         if(st.i+1>=st.order.length){ st.finished=true; } else { st.i++; st.picked=null; }
         draw(); return;
       }
@@ -23763,52 +23784,53 @@ window.__TOC_EXTRA2=[
 
     function injectTab(){
       var el=document.getElementById('tabs'); if(!el) return;
-      try{ if(typeof cur==='undefined'||!cur||cur.id!=='torohan'){ var x=el.querySelector('[data-tab="rev"]'); if(x&&x.parentNode) x.parentNode.removeChild(x); return; } }catch(e){}
-      if(el.querySelector('[data-tab="rev"]')) return;
+      if(!curEx()){ var x=el.querySelector('[data-tab="rev"]'); if(x&&x.parentNode) x.parentNode.removeChild(x); return; }
+      var ex=el.querySelector('[data-tab="rev"]');
+      var n=wrongList().length;
+      var label='復習'+(n?'<span class="n">'+n+'</span>':'');
+      if(ex){ if(ex.innerHTML!==label) ex.innerHTML=label; return; }
       var b=document.createElement('button');
       b.className='tab'+(tab==='rev'?' on':'');
       b.setAttribute('data-tab','rev');
-      b.textContent='復習';
+      b.innerHTML=label;
       var kids=el.children, ref=null, z;
-      for(z=0;z<kids.length;z++){ var d1=kids[z].getAttribute&&kids[z].getAttribute('data-tab'); if(d1==='toc'){ ref=kids[z].nextSibling; break; } }
-      if(!ref){ for(z=0;z<kids.length;z++){ var d2=kids[z].getAttribute&&kids[z].getAttribute('data-tab'); if(d2==='tagd'){ ref=kids[z].nextSibling; break; } } }
+      for(z=0;z<kids.length;z++){ var d=kids[z].getAttribute&&kids[z].getAttribute('data-tab'); if(d==='tagd'){ ref=kids[z].nextSibling; break; } }
       if(ref) el.insertBefore(b,ref); else el.appendChild(b);
     }
 
-    if(typeof renderTabs==='function' && !renderTabs.__tocrev){
+    if(typeof renderTabs==='function' && !renderTabs.__tocrev2){
       var _rt=renderTabs;
       var w1=function(){ var r=_rt.apply(this,arguments); try{ injectTab(); }catch(e){} return r; };
-      w1.__tocrev=1; window.renderTabs=w1;
+      w1.__tocrev2=1; window.renderTabs=w1;
     }
-    if(typeof renderPanel==='function' && !renderPanel.__tocrev){
+    if(typeof renderPanel==='function' && !renderPanel.__tocrev2){
       var _rp=renderPanel;
       var w2=function(){
         try{
           if(tab==='rev'){
-            if(typeof cur!=='undefined' && cur && cur.id==='torohan'){ draw(); return; }
+            if(curEx()){ draw(); return; }
             tab='overview';
           }
         }catch(e){}
         return _rp.apply(this,arguments);
       };
-      w2.__tocrev=1; window.renderPanel=w2;
+      w2.__tocrev2=1; window.renderPanel=w2;
     }
 
     document.addEventListener('click',function(ev){
       var el=ev.target;
       while(el&&el!==document){ if(el.getAttribute&&el.getAttribute('data-tab')==='rev') break; el=el.parentNode; }
       if(!el||el===document) return;
-      if(typeof cur==='undefined'||!cur||cur.id!=='torohan') return;
-      tab='rev';
-      st.started=false; st.finished=false;
+      if(!curEx()) return;
+      tab='rev'; st.started=false; st.finished=false;
       try{ renderTabs(); }catch(e){}
       try{ renderPanel(); }catch(e){}
     },true);
 
     try{ renderTabs(); }catch(e){}
-  }catch(e){ if(window.console) console.error('TOC REVIEW',e); }
+  }catch(e){ if(window.console) console.error('TOC REVIEW2',e); }
 })();
-/* TOC REVIEW END */
+/* TOC REVIEW2 END */
 
 </script>
 
