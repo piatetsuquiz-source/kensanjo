@@ -23777,7 +23777,7 @@ window.__TOC_EXTRA2=[
         mark(idx, ok); draw(); return;
       }
       if(el.getAttribute('data-rev2next')){
-        if(st.i+1>=st.order.length){ st.finished=true; } else { st.i++; st.picked=null; }
+        if(st.i+1>=st.order.length){ st.finished=true; try{ if(window.__REVHIST) window.__REVHIST.add(e.id, st.done, st.right); }catch(_){} } else { st.i++; st.picked=null; }
         draw(); return;
       }
     },true);
@@ -24805,6 +24805,70 @@ try{
 }catch(err){ console.warn('q6 '+err.message);}
 })();
 /* Q6 END */
+
+</script>
+<script>
+/* TOC REVHIST PATCHED */
+(function(){
+  try{
+    if(window.__REVHIST_APPLIED) return; window.__REVHIST_APPLIED=1;
+    var HK='gk_rev_history';
+    function loadH(){ try{ var a=JSON.parse(localStorage.getItem(HK)||'[]'); return (a&&a.length!==undefined)?a:[]; }catch(e){ return []; } }
+    function saveH(a){ try{ a=a.slice(-100); localStorage.setItem(HK,JSON.stringify(a)); }catch(e){} }
+    window.__REVHIST={
+      add:function(eid,n,r){ try{ if(!n) return; var a=loadH(); a.push({t:Date.now(),eid:eid,n:n,r:r}); saveH(a); }catch(e){} },
+      load:loadH
+    };
+    function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function curEx(){ try{ return (typeof cur!=='undefined')?cur:null; }catch(e){ return null; } }
+    function block(e){
+      var all=loadH().filter(function(x){ return x&&x.t; });
+      var mine=all.filter(function(x){ return x.eid===e.id; });
+      var h='<section class="sec-head"><h2>復習の履歴</h2><span class="bar"></span><span class="note">「復習」タブの実施記録</span></section>';
+      if(!all.length){
+        return h+'<div class="card"><p class="keys-note">まだ復習の履歴がありません。「復習」タブで誤答を解き直すと、その結果がここに積み上がります。</p></div>';
+      }
+      var sp=0, sr=0;
+      mine.forEach(function(x){ sp+=x.n; sr+=x.r; });
+      var rate=sp?Math.round(sr/sp*100):0;
+      var rows=mine.slice().reverse().slice(0,8).map(function(x){
+        var d=new Date(x.t), pc=x.n?Math.round(x.r/x.n*100):0;
+        var lbl=(d.getMonth()+1)+'/'+d.getDate()+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+        return '<div class="bar-row"><span class="bar-name">'+lbl+'</span>'+
+          '<span class="bar-track"><span class="bar-fill" style="width:'+pc+'%"></span></span>'+
+          '<span class="bar-n">'+x.r+'/'+x.n+'問 '+pc+'%</span></div>';
+      }).join('');
+      var body='<div class="stat-grid" style="margin-bottom:14px">'+
+          '<div class="stat"><div class="stat-k">この資格の復習</div><div class="stat-v">'+mine.length+'<small>回</small></div></div>'+
+          '<div class="stat"><div class="stat-k">解き直した問題</div><div class="stat-v">'+sp+'<small>問</small></div></div>'+
+          '<div class="stat"><div class="stat-k">復習 正答率</div><div class="stat-v">'+rate+'<small>%</small></div></div>'+
+          '<div class="stat"><div class="stat-k">全資格の復習</div><div class="stat-v">'+all.length+'<small>回</small></div></div>'+
+        '</div>';
+      if(!mine.length) body+='<p class="keys-note">この資格の復習履歴はまだありません（全資格では '+all.length+' 回）。</p>';
+      else body+=rows;
+      body+='<div class="tlegend" style="margin-top:14px"><span>「復習」タブで解き直した結果のみを記録しています（最新8件を表示）。正解した問題は復習リストから自動で外れます。</span></div>';
+      return h+'<div class="card">'+body+'</div>';
+    }
+    if(typeof renderPanel==='function' && !renderPanel.__revhist){
+      var _rp=renderPanel;
+      var w=function(){
+        var r=_rp.apply(this,arguments);
+        try{
+          var e=curEx();
+          if(typeof tab!=='undefined' && tab==='record' && e){
+            var host=document.getElementById('panels');
+            if(host && !document.getElementById('revHistWrap')){
+              host.insertAdjacentHTML('beforeend','<div id="revHistWrap">'+block(e)+'</div>');
+            }
+          }
+        }catch(_){}
+        return r;
+      };
+      w.__revhist=1; window.renderPanel=w;
+    }
+  }catch(e){ if(window.console) console.error('TOC REVHIST',e); }
+})();
+/* TOC REVHIST END */
 
 </script>
 </body>
