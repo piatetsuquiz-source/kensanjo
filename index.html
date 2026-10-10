@@ -23395,5 +23395,349 @@ try{ if(typeof renderAll==="function") renderAll(); }catch(e){}
 /* TOUROKU TOC END */
 
 </script>
+<style>
+.ect-root{--ekt-ok:#1D6B4E;--ekt-ng:#C0392B}
+.ect-info{font-size:13px;line-height:1.75;color:#33465E}
+.ect-info b{color:#0E1C2E}
+.ect-info .src{font-family:var(--mono,monospace);font-size:11px;color:#66788E}
+.ect-seg{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+.ect-seg button{font-family:var(--serif,serif);font-size:13.5px;font-weight:600;color:#0E1C2E;background:#fff;border:1px solid #C9D3DE;border-radius:999px;padding:7px 16px;cursor:pointer;transition:.15s}
+.ect-seg button:hover{border-color:#1E4A75}
+.ect-seg button.on{background:#0B1826;color:#fff;border-color:#0B1826}
+.ect-ctl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:12px 0}
+.ect-ctl label{font-size:12px;color:#5B6B80;font-weight:600;display:inline-flex;align-items:center;gap:8px}
+.ect-ctl input[type=range]{width:150px;accent-color:#1E4A75}
+.ect-ctl .val{font-family:var(--mono,monospace);font-size:12px;color:#0E1C2E;min-width:52px;display:inline-block}
+.ect-ctl select{font-family:inherit;font-size:13px;padding:6px 10px;border:1px solid #C9D3DE;border-radius:8px;background:#fff;color:#0E1C2E}
+.ect-btn{font-family:var(--serif,serif);font-size:13.5px;font-weight:600;color:#fff;background:#1E4A75;border:none;border-radius:9px;padding:9px 18px;cursor:pointer;transition:.15s}
+.ect-btn:hover{background:#173A5C}
+.ect-btn.ghost{background:#fff;color:#1E4A75;border:1px solid #1E4A75}
+.ect-btn.ghost:hover{background:#F1F5F9}
+.ect-btn.mini{padding:6px 12px;font-size:12.5px}
+.ect-btn:disabled{opacity:.45;cursor:not-allowed}
+.ect-panel{background:#fff;border:1px solid #DCE3EA;border-radius:14px;padding:16px 18px;margin-top:12px}
+.ect-readout{font-family:var(--mono,monospace);font-size:26px;letter-spacing:.14em;color:#0E1C2E;background:#F4F7FA;border:1px solid #DCE3EA;border-radius:10px;padding:16px 18px;min-height:34px;word-break:break-all;line-height:1.5}
+.ect-readout.small{font-size:15px;letter-spacing:.06em}
+.ect-mark{font-size:15px;letter-spacing:.12em;font-family:var(--mono,monospace)}
+.ect-mark i{font-style:normal}
+.ect-mark i.ok{color:var(--ekt-ok);font-weight:700}
+.ect-mark i.ng{color:var(--ekt-ng);font-weight:700;text-decoration:underline}
+.ect-input{width:100%;box-sizing:border-box;font-family:var(--mono,monospace);font-size:17px;letter-spacing:.1em;padding:12px 14px;border:1px solid #C9D3DE;border-radius:10px;background:#fff;color:#0E1C2E;margin-top:8px}
+.ect-input:focus{outline:none;border-color:#1E4A75;box-shadow:0 0 0 3px rgba(30,74,117,.12)}
+.ect-sig{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:8px}
+.ect-cell{border:1px solid #DCE3EA;border-radius:10px;padding:8px 9px;background:#fff;text-align:center}
+.ect-cell .ch{font-size:19px;font-weight:700;color:#0E1C2E;font-family:var(--serif,serif)}
+.ect-cell .co{font-family:var(--mono,monospace);font-size:13px;color:#1E4A75;letter-spacing:.08em;margin:2px 0 5px}
+.ect-cell .word{font-family:var(--mono,monospace);font-size:11px;color:#66788E}
+.ect-cell .p{font-size:10.5px;color:#5B6B80;cursor:pointer;background:#F1F5F9;border:1px solid #DCE3EA;border-radius:6px;padding:2px 8px;font-family:var(--mono,monospace)}
+.ect-cell .p:hover{background:#E3EBF3}
+.ect-key{width:100%;height:88px;border-radius:14px;border:2px solid #1E4A75;background:linear-gradient(180deg,#F1F5F9,#DCE3EA);color:#0B1826;font-family:var(--serif,serif);font-size:16px;font-weight:700;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none;transition:.06s}
+.ect-key.down{background:#1E4A75;color:#fff;transform:translateY(1px)}
+.ect-note{font-size:12px;color:#66788E;line-height:1.7;margin-top:8px}
+.ect-stat{display:inline-flex;gap:6px;align-items:baseline;font-size:12.5px;color:#5B6B80;font-family:var(--mono,monospace)}
+.ect-stat b{font-size:16px;color:#0E1C2E;font-family:var(--serif,serif)}
+@media(max-width:560px){.ect-readout{font-size:20px}.ect-key{height:104px}}
+</style>
+<script>
+/* ===== ECT CORE: 無線局運用規則 別表第一号・第五号 ===== */
+var ECT = (function () {
+  var JA = {'イ':'.-','ロ':'.-.-','ハ':'-...','ニ':'-.-.','ホ':'-..','ヘ':'.','ト':'..-..','チ':'..-.','リ':'--.','ヌ':'....','ル':'-.--.','ヲ':'.---','ワ':'-.-','カ':'.-..','ヨ':'--','タ':'-.','レ':'---','ソ':'---.','ツ':'.--.','ネ':'--.-','ナ':'.-.','ラ':'...','ム':'-','ウ':'..-','ヰ':'.-..-','ノ':'..--','オ':'.-...','ク':'...-','ヤ':'.--','マ':'-..-','ケ':'-.--','フ':'--..','コ':'----','エ':'-.---','テ':'.-.--','ア':'--.--','サ':'-.-.-','キ':'-.-..','ユ':'-..--','メ':'-...-','ミ':'..-.-','シ':'--.-.','ヱ':'.--..','ヒ':'--..-','モ':'-..-.','セ':'.---.','ス':'---.-','ン':'.-.-.','゛':'..','゜':'..--.'};
+  var EN = {'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.','H':'....','I':'..','J':'.---','K':'-.-','L':'.-..','M':'--','N':'-.','O':'---','P':'.--.','Q':'--.-','R':'.-.','S':'...','T':'-','U':'..-','V':'...-','W':'.--','X':'-..-','Y':'-.--','Z':'--..'};
+  var DIG = {'0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'};
+  var SYM = {'.':'.-.-.-',',':'--..--','?':'..--..',"'":'.----.','!':'-.-.--','/':'-..-.','(':'-.--.',')':'-.--.-','&':'.-...',':':'---...',';':'-.-.-.','=':'-...-','+':'.-.-.','-':'-....-','_':'..--.-','"':'.-..-.','$':'...-..-','@':'.--.-.'};
+  var SP = [{ch:'訂正',kana:'和文',code:'...-.',note:'誤送信の訂正。訂正する字の2〜3字前から再送するのに前置（ラタ）。'},{ch:'訂正',kana:'欧文',code:'........',note:'欧文電信の訂正。8点を前置。'},{ch:'終端',kana:'欧文',code:'.-.-.',note:'欧文電報の終わり（AR）。記号「+」と同符号。'},{ch:'区切',kana:'和文',code:'.-.-',note:'和文電報の区切（「ヨ」と同符号）。'}];
+  var PHON = {'A':'Alfa','B':'Bravo','C':'Charlie','D':'Delta','E':'Echo','F':'Foxtrot','G':'Golf','H':'Hotel','I':'India','J':'Juliett','K':'Kilo','L':'Lima','M':'Mike','N':'November','O':'Oscar','P':'Papa','Q':'Quebec','R':'Romeo','S':'Sierra','T':'Tango','U':'Uniform','V':'Victor','W':'Whiskey','X':'X-ray','Y':'Yankee','Z':'Zulu','0':'Zero','1':'One','2':'Two','3':'Three','4':'Four','5':'Five','6':'Six','7':'Seven','8':'Eight','9':'Nine'};
+  var JA_ORDER = ['イ','ロ','ハ','ニ','ホ','ヘ','ト','チ','リ','ヌ','ル','ヲ','ワ','カ','ヨ','タ','レ','ソ','ツ','ネ','ナ','ラ','ム','ウ','ヰ','ノ','オ','ク','ヤ','マ','ケ','フ','コ','エ','テ','ア','サ','キ','ユ','メ','ミ','シ','ヱ','ヒ','モ','セ','ス','ン'];
+  var EN_ORDER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  var DIG_ORDER = '0123456789'.split('');
+  var SYM_ORDER = ['.',',','?',"'",'!','/','(',')','&',':',';','=','+','-','_','"','$','@'];
+  function units(sym){ if(!sym) return 0; var n=0; for(var i=0;i<sym.length;i++) n+=(sym[i]==='-')?3:1; n+=(sym.length-1); return n; }
+  function rev(map){ var r={}; for(var k in map) r[map[k]]=k; return r; }
+  var R_JA=rev(JA), R_EN=rev(EN), R_DIG=rev(DIG), R_SYM=rev(SYM);
+  function encode(text, script){
+    var map=(script==='ja')?JA:(script==='dig')?DIG:(script==='sym')?SYM:EN;
+    var out=[];
+    for(var i=0;i<text.length;i++){ var ch=text[i];
+      if(ch===' '){ out.push(' '); continue; }
+      var s=map[ch]||map[ch.toUpperCase()]||null;
+      out.push(s?{ch:ch,sym:s}:{ch:ch,sym:null});
+    }
+    return out;
+  }
+  function decodeSym(sym, script){
+    var map=(script==='ja')?R_JA:(script==='dig')?R_DIG:(script==='sym')?R_SYM:R_EN;
+    return map[sym]||null;
+  }
+  function txClassify(segs, unitMs){
+    var symbols=[], code='';
+    for(var i=0;i<segs.length;i++){
+      if(i>0){ var g=segs[i].gap;
+        if(g<2*unitMs){ /* same char */ }
+        else { symbols.push(code); code=''; if(g>=5*unitMs) symbols.push(' '); }
+      }
+      code += (segs[i].tone<2*unitMs)?'.':'-';
+    }
+    if(code) symbols.push(code);
+    return symbols;
+  }
+  return {JA:JA,EN:EN,DIG:DIG,SYM:SYM,SP:SP,PHON:PHON,JA_ORDER:JA_ORDER,EN_ORDER:EN_ORDER,DIG_ORDER:DIG_ORDER,SYM_ORDER:SYM_ORDER,units:units,encode:encode,decodeSym:decodeSym,txClassify:txClassify,unitMsFromRate:function(r){return 6000/r;}};
+})();
+</script>
+<script>
+/* ECT PATCHED */
+(function(){
+try{
+  var IDS=['crc1','crc2','crc3'];
+  var ECT=window.ECT; if(!ECT) return;
+  var WORDS=('WEATHER REPORT MESSAGE SIGNAL STATION FREQUENCY VESSEL AIRCRAFT POSITION DISTRESS URGENCY SAFETY CALLING REPLY CONFIRM RECEIVED ANTENNA TRANSMITTER RECEIVER DISTANCE BEARING COURSE SPEED HARBOR ISLAND CLIMATE PRESSURE TEMPERATURE STORM CLOUD WIND WAVE TIDE CURRENT NAVIGATION EMERGENCY RESCUE ASSISTANCE COORDINATE TIME ZONE RADIO OPERATOR PRIORITY').split(' ');
+  var JA_POOL=ECT.JA_ORDER.filter(function(c){return 'ヰヱ゛゜'.indexOf(c)<0;});
+
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function ac(){ try{ if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)(); if(AC&&AC.state==='suspended') AC.resume(); }catch(e){AC=null;} return AC; }
+  var AC=null;
+  function tone(t,dur,freq,gainv){
+    var c=ac(); if(!c) return;
+    var o=c.createOscillator(), g=c.createGain();
+    o.type='sine'; o.frequency.value=freq;
+    var ramp=Math.min(0.006,dur/3), gv=gainv||0.22;
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(gv,t+ramp);
+    g.gain.setValueAtTime(gv,Math.max(t+ramp,t+dur-ramp));
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur+0.02);
+  }
+  function playSymbols(syms,unitMs,freq,extraGapMs){
+    var c=ac(); if(!c) return 0;
+    var t=c.currentTime+0.08, u=unitMs/1000;
+    for(var i=0;i<syms.length;i++){
+      var sym=syms[i];
+      if(sym===' '){ t+=7*u; continue; }
+      var els=String(sym).split('');
+      for(var j=0;j<els.length;j++){
+        var dur=(els[j]==='-')?3*u:u;
+        tone(t,dur,freq); t+=dur; if(j<els.length-1) t+=u;
+      }
+      if(i<syms.length-1) t += 3*u + (extraGapMs||0)/1000;
+    }
+    return (t-c.currentTime)*1000;
+  }
+  function playOne(sym,unitMs,freq){ var c=ac(); if(!c)return; var t=c.currentTime+0.06,u=unitMs/1000; var els=String(sym).split(''); for(var j=0;j<els.length;j++){ var dur=(els[j]==='-')?3*u:u; tone(t,dur,freq); t+=dur; if(j<els.length-1) t+=u; } }
+
+  var ttsOK=(typeof speechSynthesis!=='undefined'&&typeof SpeechSynthesisUtterance!=='undefined');
+  function speak(word){ if(!ttsOK) return false; try{ var u=new SpeechSynthesisUtterance(word); u.lang='en-US'; u.rate=0.8; speechSynthesis.cancel(); speechSynthesis.speak(u); return true; }catch(e){ return false; } }
+
+  var S={
+    view:'rx',
+    rx:{kind:'en',style:'groups',rate:80,tone:700,group:5,target:'',last:'',shown:false,result:''},
+    tx:{kind:'en',rate:80,tone:700,target:'',segs:[],down:0,lastUp:0,decoded:'',result:''},
+    phon:{mode:'see',target:'',shown:false,result:''},
+    n:0,r:0,tn:0,tr:0,pn:0,pr:0
+  };
+  function defRates(id){ return (id==='crc3')?{ja:70,grp:80,plain:100}:{ja:75,grp:80,plain:100}; }
+  function rand(arr,n){ var a=arr.slice(),o=[]; for(var i=0;i<n;i++){ o.push(a[Math.floor(Math.random()*a.length)]); } return o; }
+  function genRx(){
+    var k=S.rx.kind, st=S.rx.style, g=S.rx.group;
+    if(k==='ja'){ return rand(JA_POOL,6).join(' '); }
+    if(st==='plain'){ var n=2+Math.floor(Math.random()*2); return rand(WORDS,n).join(' / '); }
+    var groups=[], gc=4+Math.floor(Math.random()*3);
+    for(var i=0;i<gc;i++){ groups.push(rand(ECT.EN_ORDER,g).join('')); }
+    return groups.join(' ');
+  }
+  function norm(s){ return String(s||'').replace(/[\s\/・、,，]/g,'').toUpperCase(); }
+  function mark(target,typed){
+    var t=norm(target), y=norm(typed), out='', n=Math.max(t.length,y.length), r=0;
+    for(var i=0;i<n;i++){ var a=t[i]||'', b=y[i]||''; var ok=(a&&b&&a===b); if(ok)r++; out+='<i class="'+(ok?'ok':'ng')+'">'+esc(a||'·')+'</i>'; }
+    return {html:out, r:r, n:t.length};
+  }
+  function opt(v,l,cur){ return '<option value="'+v+'"'+(cur===v?' selected':'')+'>'+l+'</option>'; }
+
+  function view(){
+    var id=(typeof cur!=='undefined'&&cur)?cur.id:'';
+    var head='<section class="sec-head"><h2>電気通信術 練習</h2><span class="bar"></span><span class="note">モールス送受信・通話</span></section>'+
+      '<div class="ect-root">'+
+      '<div class="card ect-info"><b>試験の方法（モールス電信）</b>　送信は電鍵による手送り、受信は音響受信。速度は '+
+      (id==='crc3'?'<b>和文70字/分・欧文暗語80字/分・欧文普通語100字/分（各約3分）</b>':'<b>和文75字/分・欧文暗語80字/分・欧文普通語100字/分（各約5分）</b>')+
+      '。合格は各種目100点満点の減点法で<b>送受とも210点以上（3種目に30点未満が無いこと）</b>。<br>'+
+      '<span class="src">出典：無線従事者規則第3条／無線局運用規則 別表第一号・別表第五号／平成2年郵政省告示第721号</span></div>'+
+      '<div class="ect-seg">'+seg('rx','受信練習')+seg('tx','送信練習')+seg('table','符号表')+seg('phon','通話練習')+'</div>';
+    var body=(S.view==='tx')?viewTx():(S.view==='table')?viewTable():(S.view==='phon')?viewPhon():viewRx();
+    return head+body+'</div>';
+  }
+  function seg(v,label){ return '<button data-ect="view" data-v="'+v+'" class="'+(S.view===v?'on':'')+'">'+label+'</button>'; }
+
+  function viewRx(){
+    var k=S.rx.kind, st=S.rx.style, rate=S.rx.rate;
+    var kindSel='<label>種類 <select data-ect-sel="kind">'+opt('en','欧文',k)+opt('ja','和文',k)+'</select></label>';
+    var styleSel=(k==='en')?('<label>形式 <select data-ect-sel="style">'+opt('groups','暗語（符号群）',st)+opt('plain','普通語',st)+'</select></label>'):'';
+    var ctl='<div class="ect-ctl">'+kindSel+styleSel+
+      '<label>速度 <input type="range" min="40" max="140" step="5" value="'+rate+'" data-ect-range="rate"><span class="val">'+rate+'字/分</span></label>'+
+      '<label>音調 <input type="range" min="500" max="1000" step="50" value="'+S.rx.tone+'" data-ect-range="tone"><span class="val">'+S.rx.tone+'Hz</span></label>'+
+      '<label>字数 <input type="range" min="2" max="10" step="1" value="'+S.rx.group+'" data-ect-range="group"><span class="val">'+S.rx.group+'</span></label>'+
+      '</div>';
+    var target=S.rx.target;
+    var readout=target?('<div class="ect-readout small">'+(S.rx.shown?esc(target):'— — —　（音を聴いて下の欄に入力）')+'</div>'):('<div class="ect-readout small">「出題」を押してください</div>');
+    var result=S.rx.result?('<div class="ect-note">採点：<span class="ect-mark">'+S.rx.result+'</span></div>'):'';
+    return '<div class="ect-panel">'+ctl+
+      '<div style="margin:10px 0 6px"><button class="ect-btn" data-ect="newRx">出題</button> '+
+      '<button class="ect-btn ghost" data-ect="playRx"'+(target?'':' disabled')+'>▶ 再生</button> '+
+      '<button class="ect-btn ghost" data-ect="playRxSlow"'+(target?'':' disabled')+'>低速再生</button> '+
+      '<button class="ect-btn ghost mini" data-ect="revealRx"'+(target?'':' disabled')+'>'+(S.rx.shown?'隠す':'手本')+'</button></div>'+
+      readout+
+      '<input class="ect-input" id="ectRxIn" placeholder="聴き取った文字を入力（例：QRT / カキク）" autocomplete="off" spellcheck="false">'+
+      '<div style="margin-top:10px"><button class="ect-btn" data-ect="gradeRx">採点</button> '+
+      '<span class="ect-stat" style="margin-left:10px">完全一致 <b>'+S.r+'</b> / '+S.n+'</span>'+result+'</div>'+
+      '<div class="ect-note">受信は機器から流れる音を聴取して解答する形式です。「出題」→「再生」で流れます。繰返し聴き、誤りが減ったら速度を上げます。低速再生は符号速度を保ったまま字間を広げる（Farnsworth）方式です。</div>'+
+      '</div>';
+  }
+
+  function viewTx(){
+    var k=S.tx.kind;
+    var ctl='<div class="ect-ctl">'+
+      '<label>種類 <select data-ect-sel="txkind">'+opt('en','欧文',k)+opt('ja','和文',k)+'</select></label>'+
+      '<label>速度 <input type="range" min="40" max="120" step="5" value="'+S.tx.rate+'" data-ect-range="txrate"><span class="val">'+S.tx.rate+'字/分</span></label>'+
+      '<label>音調 <input type="range" min="500" max="1000" step="50" value="'+S.tx.tone+'" data-ect-range="txtone"><span class="val">'+S.tx.tone+'Hz</span></label>'+
+      '</div>';
+    var target=S.tx.target?esc(S.tx.target):'— — —';
+    return '<div class="ect-panel">'+ctl+
+      '<div class="ect-note" style="margin-bottom:6px">送信練習：下の問題を電鍵で送信します。「出題」→ 下の鍵（またはキーボードの <b>スペース</b>）を押して、短点=短く、長点=長く打ってください。押し続けて離すと1字、少し間を置くと次の字になります。</div>'+
+      '<div class="ect-readout">'+target+'</div>'+
+      '<div style="margin:10px 0 6px"><button class="ect-btn" data-ect="newTx">出題</button> '+
+      '<button class="ect-btn ghost" data-ect="playTx"'+(S.tx.target?'':' disabled')+'>▶ 手本を聴く</button> '+
+      '<button class="ect-btn ghost mini" data-ect="clearTx">クリア</button> '+
+      '<button class="ect-btn" data-ect="gradeTx">採点</button></div>'+
+      '<div class="ect-key" data-ect-key>電 鍵<br><span style="font-size:12px;font-weight:500">押している間だけ音が出ます／Spaceキーも可</span></div>'+
+      '<div class="ect-note">あなたの送信（解読）：</div>'+
+      '<div class="ect-readout small" id="ectTxOut">'+(S.tx.decoded?esc(S.tx.decoded):'—')+'</div>'+
+      (S.tx.result?('<div class="ect-note">採点：<span class="ect-mark">'+S.tx.result+'</span></div>'):'')+
+      '<div class="ect-note">手送り送信の速度は「1分間に送る字数」で表します。短点=1点、長点=3点、字間は3点を目安にすると正しいリズムになります。</div>'+
+      '</div>';
+  }
+
+  function viewTable(){
+    var q=(S.tq||'').toUpperCase();
+    function cell(x){ var f=(x.a+' '+x.c+' '+(x.w||'')).toUpperCase(); return '<div class="ect-cell" data-f="'+esc(f)+'"><div class="ch">'+esc(x.a)+'</div><div class="co">'+esc(x.c)+'</div>'+(x.w?('<div class="word">'+esc(x.w)+'</div>'):'')+'<button class="p" data-ect="playsym" data-sym="'+esc(x.c)+'" data-tone="'+S.rx.tone+'">▶</button></div>'; }
+    function rows(rows){ return rows.map(cell).join(''); }
+    var ja=ECT.JA_ORDER.map(function(c){ return {a:c,c:ECT.JA[c]}; });
+    var en=ECT.EN_ORDER.map(function(c){ return {a:c,c:ECT.EN[c]}; });
+    var dig=ECT.DIG_ORDER.map(function(c){ return {a:c,c:ECT.DIG[c]}; });
+    var sym=ECT.SYM_ORDER.map(function(c){ return {a:c,c:ECT.SYM[c]}; });
+    var sp=ECT.SP.map(function(x){ return {a:x.ch+(x.kana?'('+x.kana+')':''),c:x.code,w:x.note}; });
+    var phon=Object.keys(ECT.PHON).map(function(c){ return {a:c,c:ECT.PHON[c]}; });
+    function sec(t,rr){ return '<div class="ect-note" style="font-weight:700;color:#0E1C2E;margin-top:14px">'+t+'</div><div class="ect-sig">'+rows(rr)+'</div>'; }
+    return '<div class="ect-panel">'+
+      '<div class="ect-ctl"><label>絞り込み <input class="ect-input" style="width:180px;margin:0;font-size:14px;padding:7px 10px" id="ectTq" value="'+esc(S.tq||'')+'" placeholder="A / ト / .- など"></label>'+
+      '<button class="ect-btn ghost mini" data-ect="tplay">欧文A〜Zを順に再生</button></div>'+
+      sec('欧文（アルファベット）',en)+sec('数字',dig)+sec('和文（イロハ順）',ja)+sec('欧文記号',sym)+sec('特殊（訂正・区切・終端）',sp)+
+      '<div class="ect-note" style="font-weight:700;color:#0E1C2E;margin-top:14px">欧文通話表（別表第五号）</div><div class="ect-sig">'+rows(phon)+'</div>'+
+      '<div class="ect-note">点=「.」、長点=「-」。構成は 短点1点・長点3点、符号内間隔1点、字間3点、語間7点（無線局運用規則 別表第一号）。▶で各符号の音を確認できます。</div>'+
+      '</div>';
+  }
+
+  function viewPhon(){
+    var ctl='<div class="ect-ctl"><label>方向 <select data-ect-sel="phonmode">'+opt('see','通話語を書く（字→語）',S.phon.mode)+opt('hear','聴き取る（音→字）',S.phon.mode)+'</select></label></div>';
+    var target=S.phon.target, prompt, ansField;
+    if(target){
+      if(S.phon.mode==='hear'){ prompt='<div class="ect-readout small">🔊 「'+(S.phon.shown?esc(ECT.PHON[target]):'？？？')+'」　— 聴こえた通話語の<b>英字・数字</b>を入力</div>'; ansField='<input class="ect-input" id="ectPhonIn" placeholder="例：A / 3" autocomplete="off" spellcheck="false">'; }
+      else { prompt='<div class="ect-readout">'+esc(target)+'</div>'; ansField='<input class="ect-input" id="ectPhonIn" placeholder="この字の通話語（例：Alfa）" autocomplete="off" spellcheck="false">'; }
+    } else { prompt='<div class="ect-readout small">「出題」を押してください</div>'; ansField=''; }
+    var playBtn=(S.phon.mode==='hear'&&target)?'<button class="ect-btn ghost" data-ect="phonplay">▶ もう一度聴く</button> ':'';
+    return '<div class="ect-panel">'+ctl+
+      '<div class="ect-note" style="margin-bottom:6px">電話試験は別表第五号の<b>欧文通話表</b>を使い、1分間50字の欧文約2分間の送話・受話。<b>現行の総通に和文通話はありません。</b>'+(ttsOK?'':'　※この端末は読み上げ非対応のため「音→字」も文字表示になります。')+'</div>'+
+      '<div style="margin:8px 0 6px"><button class="ect-btn" data-ect="phonnew">出題</button> '+playBtn+
+      '<button class="ect-btn ghost mini" data-ect="phonreveal"'+(target?'':' disabled')+'>'+(S.phon.shown?'隠す':'答え')+'</button> '+
+      '<button class="ect-btn" data-ect="phongrade">採点</button></div>'+
+      prompt+ansField+
+      (S.phon.result?('<div class="ect-note">採点：<span class="ect-mark">'+S.phon.result+'</span></div>'):'')+
+      '<div class="ect-note">通話語の正誤は綴りで判定します（Alfa・Juliett など。X-ray は Xray でも可）。</div>'+
+      '</div>';
+  }
+
+  function render(){ var el=document.getElementById('panels'); if(el) el.innerHTML='<section class="panel on">'+view()+'</section>'; }
+
+  /* ---- 送信（電鍵）---- */
+  function startKey(){ if(S.tx.down) return; var c=ac(); if(!c) return; S.tx.down=performance.now();
+    var o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.value=S.tx.tone;
+    g.gain.value=0.0001; g.gain.setTargetAtTime(0.2,c.currentTime,0.004);
+    o.connect(g); g.connect(c.destination); o.start(); S.tx.osc=o; S.tx.gainNode=g; }
+  function endKey(){ if(!S.tx.down) return; var now=performance.now(); var toneMs=now-S.tx.down; S.tx.down=0;
+    if(S.tx.gainNode){ try{ S.tx.gainNode.gain.setTargetAtTime(0.0001,ac().currentTime,0.004); }catch(e){} }
+    var osc=S.tx.osc; setTimeout(function(){ if(osc){ try{osc.stop();}catch(e){} } },40); S.tx.osc=null;
+    var unitMs=ECT.unitMsFromRate(S.tx.rate);
+    var seg={tone:toneMs,gap:S.tx.lastUp?Math.max(0,now-toneMs-S.tx.lastUp):0};
+    S.tx.segs.push(seg); S.tx.lastUp=now;
+    var scr=(S.tx.kind==='ja')?'ja':'en';
+    S.tx.decoded=ECT.txClassify(S.tx.segs,unitMs).map(function(s){ return s===' '?' ':(ECT.decodeSym(s,scr)||'?'); }).join('');
+    var out=document.getElementById('ectTxOut'); if(out) out.textContent=S.tx.decoded||'—';
+  }
+  function bindKeys(){
+    if(bindKeys._i) return; bindKeys._i=1;
+    document.addEventListener('pointerdown',function(e){ var k=e.target&&e.target.closest?e.target.closest('[data-ect-key]'):null; if(!k||S.view!=='tx') return; e.preventDefault(); if(k.setPointerCapture&&e.pointerId!=null){try{k.setPointerCapture(e.pointerId);}catch(x){}} k.classList.add('down'); startKey(); },false);
+    document.addEventListener('pointerup',function(e){ var k=e.target&&e.target.closest?e.target.closest('[data-ect-key]'):null; if(k){ k.classList.remove('down'); } if(S.view==='tx'&&S.tx.down) endKey(); },false);
+    document.addEventListener('pointercancel',function(e){ var k=document.querySelector('[data-ect-key]'); if(k)k.classList.remove('down'); if(S.view==='tx'&&S.tx.down) endKey(); },false);
+    document.addEventListener('keydown',function(e){
+      if(S.view!=='tx') return; var a=document.activeElement; if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA')) return;
+      if(e.code==='Space'||e.key===' '){ e.preventDefault(); if(e.repeat) return; var k=document.querySelector('[data-ect-key]'); if(k)k.classList.add('down'); startKey(); }
+    },false);
+    document.addEventListener('keyup',function(e){
+      if(S.view!=='tx') return; var a=document.activeElement; if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA')) return;
+      if(e.code==='Space'||e.key===' '){ var k=document.querySelector('[data-ect-key]'); if(k)k.classList.remove('down'); if(S.tx.down) endKey(); }
+    },false);
+  }
+
+  function playRx(extraGap){ var scr=(S.rx.kind==='ja')?'ja':'en'; var enc=ECT.encode(S.rx.target,scr).map(function(x){ return (typeof x==='string')?x:(x.sym||' '); }); playSymbols(enc,ECT.unitMsFromRate(S.rx.rate),S.rx.tone,extraGap); }
+  function phonEq(v,target){ var vv=String(v||'').toLowerCase().replace(/[^a-z0-9]/g,''); var w=ECT.PHON[target].toLowerCase().replace(/[^a-z0-9]/g,''); var alt={alfa:'alpha',juliett:'juliet'}; if(vv===w)return true; if(alt[w]&&vv===alt[w])return true; return false; }
+
+  document.addEventListener('click',function(ev){
+    var t=ev.target; if(!t||!t.closest) return;
+    if(t.closest('[data-tab="ect"]')){ tab='ect'; try{renderTabs();}catch(e){} render(); return; }
+    var el=t.closest('[data-ect]'); if(!el) return; var act=el.getAttribute('data-ect');
+    if(act==='view'){ S.view=el.getAttribute('data-v'); render(); return; }
+    if(act==='playsym'){ playOne(el.getAttribute('data-sym'),ECT.unitMsFromRate(60),parseInt(el.getAttribute('data-tone'),10)||700); return; }
+    if(act==='tplay'){ playSymbols(ECT.EN_ORDER.map(function(c){return ECT.EN[c];}),ECT.unitMsFromRate(50),S.rx.tone,260); return; }
+    if(act==='newRx'){ S.rx.target=genRx(); S.rx.shown=false; S.rx.result=''; render(); setTimeout(function(){ try{playRx(0);}catch(e){} },120); return; }
+    if(act==='playRx'){ playRx(0); return; }
+    if(act==='playRxSlow'){ playRx(3*ECT.unitMsFromRate(S.rx.rate)); return; }
+    if(act==='revealRx'){ S.rx.shown=!S.rx.shown; render(); return; }
+    if(act==='gradeRx'){ var inp=document.getElementById('ectRxIn'); var v=inp?inp.value:S.rx.last; S.rx.last=v; var m=mark(S.rx.target,v); S.rx.result=m.html+'　一致 '+m.r+'/'+m.n; S.n++; if(m.n&&m.r===m.n)S.r++; render(); return; }
+    if(act==='newTx'){ var k=S.tx.kind; S.tx.target=(k==='ja')?rand(JA_POOL,6).join(''):rand(ECT.EN_ORDER,5).join(''); S.tx.segs=[];S.tx.lastUp=0;S.tx.decoded='';S.tx.result=''; render(); return; }
+    if(act==='playTx'){ var scr=(S.tx.kind==='ja')?'ja':'en'; var enc=ECT.encode(S.tx.target,scr).map(function(x){ return (typeof x==='string')?x:(x.sym||' '); }); playSymbols(enc,ECT.unitMsFromRate(S.tx.rate),S.tx.tone,0); return; }
+    if(act==='clearTx'){ S.tx.segs=[];S.tx.lastUp=0;S.tx.decoded='';S.tx.result=''; render(); return; }
+    if(act==='gradeTx'){ var m2=mark(S.tx.target,S.tx.decoded); S.tx.result=m2.html+'　一致 '+m2.r+'/'+m2.n; S.tn++; if(m2.n&&m2.r===m2.n)S.tr++; render(); return; }
+    if(act==='phonnew'){ var keys=Object.keys(ECT.PHON); S.phon.target=keys[Math.floor(Math.random()*keys.length)]; S.phon.shown=false; S.phon.result=''; render(); if(S.phon.mode==='hear') speak(ECT.PHON[S.phon.target]); return; }
+    if(act==='phonplay'){ if(S.phon.target) speak(ECT.PHON[S.phon.target]); return; }
+    if(act==='phonreveal'){ S.phon.shown=!S.phon.shown; render(); return; }
+    if(act==='phongrade'){ var pi=document.getElementById('ectPhonIn'); var pv=pi?pi.value:''; var ok=(S.phon.mode==='hear')? (norm(pv)===norm(S.phon.target)) : phonEq(pv,S.phon.target); S.phon.result=(ok?'<i class="ok">○ 正解</i>':'<i class="ng">× 正解：'+esc(S.phon.target)+'＝'+esc(ECT.PHON[S.phon.target])+'</i>'); S.pn++; if(ok)S.pr++; render(); return; }
+  },false);
+
+  document.addEventListener('input',function(ev){
+    var t=ev.target; if(!t) return;
+    if(t.id==='ectTq'){ var q=t.value.toUpperCase(); var cells=document.querySelectorAll('.ect-cell'); for(var i=0;i<cells.length;i++){ var f=cells[i].getAttribute('data-f')||''; cells[i].style.display=(!q||f.indexOf(q)>=0)?'':'none'; } return; }
+    var which=t.getAttribute&&t.getAttribute('data-ect-range'); if(!which) return;
+    var v=parseInt(t.value,10);
+    if(which==='rate')S.rx.rate=v; else if(which==='tone'){S.rx.tone=v;} else if(which==='group')S.rx.group=v; else if(which==='txrate')S.tx.rate=v; else if(which==='txtone')S.tx.tone=v;
+    var lab=t.closest('label'); var val=lab?lab.querySelector('.val'):null; if(val) val.textContent=(which==='tone'||which==='txtone')?(v+'Hz'):(which==='group'?(''+v):(v+'字/分'));
+  },false);
+  document.addEventListener('change',function(ev){
+    var t=ev.target; if(!t||!t.getAttribute) return; var k=t.getAttribute('data-ect-sel'); if(!k) return;
+    var id=(typeof cur!=='undefined'&&cur)?cur.id:'';
+    if(k==='kind'){ S.rx.kind=t.value; S.rx.rate=(S.rx.kind==='ja')?defRates(id).ja:defRates(id).grp; S.rx.target='';S.rx.result=''; render(); return; }
+    if(k==='style'){ S.rx.style=t.value; S.rx.rate=(t.value==='plain')?defRates(id).plain:defRates(id).grp; render(); return; }
+    if(k==='txkind'){ S.tx.kind=t.value; render(); return; }
+    if(k==='phonmode'){ S.phon.mode=t.value; S.phon.target='';S.phon.result=''; render(); return; }
+  },false);
+
+  function isECT(){ return (typeof cur!=='undefined'&&cur&&IDS.indexOf(cur.id)>=0); }
+  var _rt=renderTabs;
+  renderTabs=function(){ var r=_rt.apply(this,arguments); if(isECT()){ var host=document.getElementById('tabs'); if(host&&!host.querySelector('[data-tab="ect"]')) host.insertAdjacentHTML('beforeend','<button class="tab'+(tab==='ect'?' on':'')+'" data-tab="ect">電信</button>'); } return r; };
+  var _rp=renderPanel;
+  renderPanel=function(){ if(isECT()&&tab==='ect'){ render(); return; } if(tab==='ect'&&!isECT()){ tab='overview'; } return _rp.apply(this,arguments); };
+  bindKeys();
+  try{ renderTabs(); if(tab==='ect') renderPanel(); }catch(e){}
+  if(window.console) console.log('ECT PATCHED ready');
+}catch(err){ if(window.console) console.warn('ECT '+err.message); }
+})();
+/* ECT END */
+</script>
+
 </body>
 </html>
